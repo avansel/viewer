@@ -1,11 +1,14 @@
 
 import { MathUtils } from "three"
+import { normLng } from '../components/utils.ts'
 
 let isUserInteracting = false,
 onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-lon = 90, onPointerDownLon = 0,
+lng = 90, onPointerDownLng = 0,
 lat = 0, onPointerDownLat = 0,
 phi = 0, theta = 0;
+
+let onFovChanged, onCameraMove;
 
 class PanoControls {
 
@@ -15,42 +18,63 @@ class PanoControls {
         this.init()
     }
 
-    tick(delta) {
-        if ( isUserInteracting === false ) {
-            lon += 0.025;
-        }
+    getFov(){
+        return this.camera.fov
+    }
 
-        lat = Math.max( - 89.5, Math.min( 89.5, lat ) );
+    getPosition(){
+        return { lat, lng: normLng(lng) }
+    }
+
+    lookAt(lat, lng){
+        lat = Math.max( - 90, Math.min( 89.9999999999, lat ) );
         phi = MathUtils.degToRad( 90 - lat );
-        theta = MathUtils.degToRad( lon );
+        theta = MathUtils.degToRad( lng );
   
         const x = 500 * Math.sin( phi ) * Math.cos( theta );
         const y = 500 * Math.cos( phi );
         const z = 500 * Math.sin( phi ) * Math.sin( theta );
-
         this.camera.lookAt(x, y, z);
     }
 
+    tick(delta) {
+        if ( isUserInteracting === false ) {
+            //lng += 0.025;
+        }
+
+        lat = Math.max( - 90, Math.min( 89.9999999999, lat ) );
+
+        this.lookAt(lat, lng)
+    }
+
     init(){
-        
+
+        onFovChanged = new Event('onFovChanged')
+        onCameraMove = new Event('onCameraMove')
+
+        this.canvas.addEventListener( 'click', e => {
+            this.canvas.dispatchEvent(new CustomEvent('onPanoClick', {detail: e}))
+        })
+
         const onPointerDown = e => {
             if ( e.isPrimary === false ) return;    
             isUserInteracting = true;    
             onPointerDownMouseX = e.clientX;
             onPointerDownMouseY = e.clientY;
         
-            onPointerDownLon = lon;
+            onPointerDownLng = lng;
             onPointerDownLat = lat;
         
             document.addEventListener( 'pointermove', _onPointerMove );
             document.addEventListener( 'pointerup', onPointerUp );
         }
         
-        const _onPointerMove = e => ((e, camera) => {
+        const _onPointerMove = e => ((e, camera, canvas) => {
             if ( e.isPrimary === false ) return;
-            lon = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLon;
+            lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
             lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-        })(e, this.camera)
+            canvas.dispatchEvent(onCameraMove)
+        })(e, this.camera, this.canvas)
         
         const onPointerUp = (e) => {
             if ( e.isPrimary === false ) return;
@@ -59,14 +83,15 @@ class PanoControls {
             document.removeEventListener( 'pointerup', onPointerUp );
         }
         
-        const onDocumentMouseWheel = (e, camera) => {
+        const onDocumentMouseWheel = (e, camera, canvas) => {
             const fov = camera.fov + e.deltaY * camera.fov / 1000;
-            camera.fov = MathUtils.clamp( fov, 0.1, 155 );
+            camera.fov = MathUtils.clamp( fov, 0.0055, 160 );
             camera.updateProjectionMatrix();
+            canvas.dispatchEvent(onFovChanged)
         }
 
         this.canvas.addEventListener( 'pointerdown', onPointerDown );
-        document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera) );
+        document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera, this.canvas) );
     }
 
 }

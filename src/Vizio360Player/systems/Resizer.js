@@ -7,6 +7,8 @@ const setSize = (container, camera, renderer) => {
   renderer.setPixelRatio(window.devicePixelRatio);
 };
 
+let customOnResize
+
 class Resizer {
   constructor(container, camera, renderer) {
     setSize(container, camera, renderer);
@@ -18,7 +20,11 @@ class Resizer {
   }
 
   onResize(){
+    if(typeof customOnResize == 'function') customOnResize()
+  }
 
+  setOnResize(fnc){
+    customOnResize = fnc
   }
 }
 

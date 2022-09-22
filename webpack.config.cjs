@@ -6,6 +6,14 @@ module.exports = {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  resolve: {
+    extensions: [".ts", ".js"]
+  },
+  module: {
+    rules: [
+      { test: /\.tsx?$/, loader: "ts-loader" }
+    ]
+  },
   performance: {
     hints: false,
     maxEntrypointSize: 512000,
