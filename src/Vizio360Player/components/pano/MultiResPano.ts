@@ -129,17 +129,16 @@ class MultiResPano {
             const side = sides[i]
             if(!this.visible.sides[side]){
               this.visible.sides[side] = { tiles: {} }
-              this.visible.sides[side].tiles[level] = tilesFor(
-                levelInt,
-                this.levels[level],
-                {x: { min: 0, max: 1 }, y: { min: 0, max: 1 } }
-              )
-              this.visible.meshes.push( level + '-' + side )
-              this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
             }
+            this.visible.sides[side].tiles[level] = tilesFor(
+              levelInt,
+              this.levels[level],
+              {x: { min: 0, max: 1 }, y: { min: 0, max: 1 } }
+            )
+            this.visible.meshes.push( level + '-' + side )
+            this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
           }
         }
-
       }
     }
   }

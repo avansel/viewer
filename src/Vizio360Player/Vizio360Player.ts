@@ -40,7 +40,7 @@ class Vizio360Player {
     this.controls = createControls(
       this.camera,
       this.renderer.domElement,
-      false
+      true
     );
 
     if(false){ //has preview
