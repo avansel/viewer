@@ -37,11 +37,10 @@ class Vizio360Player {
 
     this.loop = new Loop(this.camera, this.scene, this.renderer)
     container.append(this.renderer.domElement);
-  
     this.controls = createControls(
       this.camera,
       this.renderer.domElement,
-      true
+      false
     );
 
     if(false){ //has preview

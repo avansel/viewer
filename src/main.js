@@ -5,7 +5,7 @@ function main(){
 
   	const pano = new Vizio360Player(container, [
 			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
-			{ tileSize: 512, size: 512 * 2 ** 1, fallback: true  },
+			{ tileSize: 512, size: 512 * 2 ** 1 },
 			{ tileSize: 512, size: 512 * 2 ** 2 },
 			{ tileSize: 512, size: 512 * 2 ** 3 },
 			{ tileSize: 512, size: 512 * 2 ** 4 },

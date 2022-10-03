@@ -36,15 +36,14 @@ class MultiResPano {
 
   createPano(){
     this.pano = new Group();
-    //for(var i = 0; i < sides.length; i++) this.pano.add(createSide(sides[i], this.levels, this.source))
     this.pano.renderOrder = 2
     this.pano.name = 'multires-pano'
     return this.pano;
   }
 
-  pixelsBySize(size: number){
-    const height = this.controls.canvas.height
-    const number = height / (0.9 * this.fov * size / 100)
+  pixelsBySize(size: number, fov: number){
+    const height = this.controls.canvas.parentElement.clientHeight;
+    const number = height / (0.9 * fov * size / 100)
     return {
         number,
         visible: number >= this.pixelsMin && number <= this.pixelsMax
@@ -124,17 +123,21 @@ class MultiResPano {
   }
 
   onPosFovChanged(pos: any){
-    this.fov = pos.fov
+    this.calcVisibleData(pos)
+  }
+
+  calcVisibleData(pos: any){
     const levels = this.levels.length
     let hasVisible = false
     let maxLevel = 0
     for(var i = 0; i < levels; i++){
-      const item  = this.pixelsBySize(this.levels[i].size)
+      const item  = this.pixelsBySize(this.levels[i].size, pos.fov)
       if(this.levels[i].fallback) item.visible = true
       if(item.visible && !hasVisible) hasVisible = true
       if(item.visible && i > maxLevel) maxLevel = i
       this.visible.pixels[i] = item
     }
+    console.log(this.visible.pixels)
     this.visible.maxLevel = maxLevel
     if(!hasVisible){
       if(this.visible.pixels[0].number < this.pixelsMin) this.visible.pixels[0].visible = true
