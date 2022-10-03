@@ -106,18 +106,40 @@ class MultiResPano {
 
   sidesVisibleTiles(){
     this.visible.meshes = []
-    for(var side in this.visible.sides){
-      this.visible.sides[side].tiles = {}
-      for(var level in this.visible.pixels){
-        if(this.visible.pixels[level].visible){
+    const sides = ['f', 'b', 'u', 'd', 'l', 'r']
+    for(var level in this.visible.pixels){
+      const levelInt = parseInt(level)
+      if(this.visible.pixels[level].visible){
+
+        for(var side in this.visible.sides){
+          if(!this.visible.sides[side].tiles){
+            this.visible.sides[side].tiles = {}
+          }
           this.visible.sides[side].tiles[level] = tilesFor(
-            parseInt(level),
+            levelInt,
             this.levels[level],
             this.visible.sides[side].bounds
           )
           this.visible.meshes.push(level + '-' + side)
           this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
         }
+
+        if(this.levels[level].fallback){
+          for(var i in sides){
+            const side = sides[i]
+            if(!this.visible.sides[side]){
+              this.visible.sides[side] = { tiles: {} }
+              this.visible.sides[side].tiles[level] = tilesFor(
+                levelInt,
+                this.levels[level],
+                {x: { min: 0, max: 1 }, y: { min: 0, max: 1 } }
+              )
+              this.visible.meshes.push( level + '-' + side )
+              this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
+            }
+          }
+        }
+
       }
     }
   }
@@ -137,17 +159,14 @@ class MultiResPano {
       if(item.visible && i > maxLevel) maxLevel = i
       this.visible.pixels[i] = item
     }
-    console.log(this.visible.pixels)
     this.visible.maxLevel = maxLevel
     if(!hasVisible){
       if(this.visible.pixels[0].number < this.pixelsMin) this.visible.pixels[0].visible = true
       if(this.visible.pixels[levels - 1].number > this.pixelsMax) this.visible.pixels[levels - 1].visible = true
     }
-
     this.visible.points = this.screenPoints(1.1, 5)
     this.visible.sides = this.sidesBounds()
     this.sidesVisibleTiles()
-    console.log(this.visible)
   }
 
   addUpdateVisible(){
