@@ -2,7 +2,7 @@ import { Vizio360Player } from './Vizio360Player/Vizio360Player.ts'
 
 function main(){
 	const container = document.querySelector('#pano')
-	/*
+
   	const pano = new Vizio360Player(container, [
 			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
 			{ tileSize: 512, size: 512 * 2 ** 1, fallback: true  },
@@ -21,16 +21,10 @@ function main(){
 			{ tileSize: 512, size: 512 * 2 ** 14 },
 			{ tileSize: 512, size: 512 * 2 ** 15 }
 		],
-		() => (s, l, x, y) => {
-			return `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
-			/* krpano
-            l = parseInt(l) + 1
-			x = ((x + 1) + '').padStart(2, '0')
-            y = ((y + 1) + '').padStart(2, '0')
-            return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
-        }
+		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
 	)
-	*/
+
+	/*
 	const pano = new Vizio360Player(container, [
 		{ tileSize: 512, size: 640, fallback: true },
 		{ tileSize: 512, size: 1280, fallback: true  },
@@ -43,33 +37,9 @@ function main(){
 		y = ((y + 1) + '').padStart(2, '0')
 		return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
 	})
+	*/
+
 	pano.start()
-
-	const outputBlock = document.getElementById('output')
-
-	const updateInfo = () => {
-		const pos = controls.getPosition()
-		const fov = controls.getFov()
-		let str = ''
-		str += 'Lat Lng: ' + pos.lat.toFixed(2) + ', ' + pos.lng.toFixed(2) + '<br />'
-		str += 'Fov: ' + fov.toFixed(3) + '<br />'
-		if(pano?.visible?.pixels){
-		  for(var i = 0; i < pano.levels.length; i++){
-			const item = pano.visible.pixels[i]
-			if(item){
-			  str += 'Pixels: ' + i + ' - ' + item.number.toFixed(2) + ' - ' + (item.visible ? '*' : '') + '<br />'
-			}
-		  }  
-		}
-		if(pano?.visible?.sides){
-		  str += 'Sides: '
-		  for(var i in pano.visible.sides){
-			if(pano.visible.sides[i].visible) str += '' + i
-		  }
-		  str += '<br />'
-		}
-		outputBlock.innerHTML = str  
-	}
 
 }
 

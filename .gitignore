@@ -1,2 +1,4 @@
 /node_modules
 /tiles
+/dist/main.js
+package-lock.json

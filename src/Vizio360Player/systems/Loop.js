@@ -1,4 +1,5 @@
 import { Clock } from 'three';
+import { update } from '@tweenjs/tween.js'
 
 const clock = new Clock();
 
@@ -9,11 +10,12 @@ class Loop {
         this.camera = camera;
         this.scene = scene;
         this.renderer = renderer;
-        this.updatables = [];
+        this.updatable = [];
     }
 
     start() {
-        this.renderer.setAnimationLoop(() => {
+        this.renderer.setAnimationLoop((t) => {
+            update(t)
             this.tick();
             this.renderer.render(this.scene, this.camera);
         });
@@ -25,8 +27,8 @@ class Loop {
 
     tick() {
         const delta = clock.getDelta();
-        for (const object of this.updatables) {
-            object.tick(delta);
+        for (const object of this.updatable) {
+            object.tick(delta)
         }
     }
 

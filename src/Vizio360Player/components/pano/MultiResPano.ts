@@ -1,6 +1,7 @@
-import { Group, Mesh, Vector2, Raycaster, PerspectiveCamera, Vector3 } from 'three';
-import { createSide, updateSide, deleteSide } from './side.js';
+import { Group, Mesh, Vector2, Raycaster, PerspectiveCamera, Vector3 } from 'three'
+import { createSide, updateSide, deleteSide } from './side.js'
 import { normLat, normLng, tilesFor } from '../utils'
+import { createCube } from './cube'
 import { tileBase, maxLevels } from '../../config.js'
 
 class MultiResPano {
@@ -8,25 +9,29 @@ class MultiResPano {
   levels: Array<any>;
   source: Function | string;
   controls: any;
+  camera: PerspectiveCamera;
   pano: Group;
   pos: Object;
   fov: number;
   visible: any;
   pixelsMin: number;
   pixelsMax: number;
+  cube: Mesh;
 
-  constructor(levels: Array<any>, source: Function | string, controls: any) {
+  constructor(levels: Array<any>, source: Function | string, controls: any, camera: PerspectiveCamera) {
     this.pixelsMin = 0.5
     this.pixelsMax = 5
     this.levels = levels;
     this.source = source;
     this.controls = controls
+    this.camera = camera
     this.visible = {
       pixels: {},
       maxLevel: 0,
       sides: {},
       meshes: []
     }
+    this.cube = createCube()
   }
 
   createPano(){
@@ -47,7 +52,7 @@ class MultiResPano {
   }
 
   pointSideXY(point: Vector3){
-    const size = ( maxLevels + tileBase + 1 )
+    const size = ( maxLevels + tileBase + 2 )
     const mul = 1000000
     const hs = size / 2
     const hsMul = (hs * mul)
@@ -82,7 +87,7 @@ class MultiResPano {
     return sides
   }
 
-  screenPoints(max: number, size: number, obj: Mesh, camera: PerspectiveCamera ){
+  screenPoints(max: number, size: number ){
     let screenPoints = []
     let points = []
     const min = -max
@@ -94,13 +99,13 @@ class MultiResPano {
     }
     const raycaster = new Raycaster()
     for(var i in screenPoints){
-      raycaster.setFromCamera( screenPoints[i], camera );
-      points.push(raycaster.intersectObject( obj )[0].point)
+      raycaster.setFromCamera( screenPoints[i], this.camera );
+      points.push(raycaster.intersectObject( this.cube )[0].point)
     }
     return points
   }
 
-  sidesVisibleTiles(obj: Mesh, camera: PerspectiveCamera){
+  sidesVisibleTiles(){
     this.visible.meshes = []
     for(var side in this.visible.sides){
       this.visible.sides[side].tiles = {}
@@ -118,8 +123,8 @@ class MultiResPano {
     }
   }
 
-  onPosFovChanged(pos: any, fov: number, obj: Mesh, camera: PerspectiveCamera){
-    this.fov = fov
+  onPosFovChanged(pos: any){
+    this.fov = pos.fov
     const levels = this.levels.length
     let hasVisible = false
     let maxLevel = 0
@@ -136,9 +141,10 @@ class MultiResPano {
       if(this.visible.pixels[levels - 1].number > this.pixelsMax) this.visible.pixels[levels - 1].visible = true
     }
 
-    this.visible.points = this.screenPoints(1.1, 5, obj, camera)
+    this.visible.points = this.screenPoints(1.1, 5)
     this.visible.sides = this.sidesBounds()
-    this.sidesVisibleTiles(obj, camera)
+    this.sidesVisibleTiles()
+    console.log(this.visible)
   }
 
   addUpdateVisible(){

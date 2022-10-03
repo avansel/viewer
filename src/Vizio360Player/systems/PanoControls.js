@@ -2,28 +2,25 @@
 import { MathUtils } from "three"
 import { normLng } from '../components/utils.ts'
 
+
 let isUserInteracting = false,
 onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-lng = 90, onPointerDownLng = 0,
-lat = 0, onPointerDownLat = 0,
-phi = 0, theta = 0;
-
-let onFovChanged, onCameraMove;
+lng = 90, lngVector = 90, onPointerDownLng = 0,
+lat = 0, latVector = 0, onPointerDownLat = 0,
+phi = 0, theta = 0,
+fov = 70, fovVector = 70
 
 class PanoControls {
 
-    constructor(camera, canvas) {
+    constructor(camera, canvas, shouldTween) {
         this.camera = camera;
         this.canvas = canvas
+        this.shouldTween = !!shouldTween
         this.init()
     }
 
-    getFov(){
-        return this.camera.fov
-    }
-
     getPosition(){
-        return { lat, lng: normLng(lng) }
+        return { lat, lng: normLng(lng), fov }
     }
 
     lookAt(lat, lng){
@@ -41,16 +38,44 @@ class PanoControls {
         if ( isUserInteracting === false ) {
             //lng += 0.025;
         }
-
         lat = Math.max( - 90, Math.min( 89.9999999999, lat ) );
-
-        this.lookAt(lat, lng)
+        if(this.shouldTween){
+            if(fovVector != fov){
+                let diff = (fov - fovVector) / 10
+                if(Math.abs(fovVector / diff) > 500000){
+                    fov = fovVector
+                }else{
+                    fov = fov - diff
+                }
+                this.canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}))
+            }
+            let posChanged = false
+            if(latVector != lat){
+                let diff = (lat - latVector) / 10
+                if(Math.abs(fov / diff) > 100000){
+                    lat = latVector
+                }else{
+                    lat = lat - diff
+                }
+                posChanged = true
+            }
+            if(lngVector != lng){
+                let diff = (lng - lngVector) / 10
+                if(Math.abs(fov / diff) > 100000){
+                    lng = lngVector
+                }else{
+                    lng = lng - diff
+                }
+                posChanged = true
+            }
+            if(posChanged){
+                this.lookAt(lat, lng)
+                this.canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng, fov }}))
+            }
+        }
     }
 
     init(){
-
-        onFovChanged = new Event('onFovChanged')
-        onCameraMove = new Event('onCameraMove')
 
         this.canvas.addEventListener( 'click', e => {
             this.canvas.dispatchEvent(new CustomEvent('onPanoClick', {detail: e}))
@@ -71,9 +96,15 @@ class PanoControls {
         
         const _onPointerMove = e => ((e, camera, canvas) => {
             if ( e.isPrimary === false ) return;
-            lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
-            lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-            canvas.dispatchEvent(onCameraMove)
+            if(this.shouldTween){
+                lngVector = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
+                latVector = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+            }else{
+                lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
+                lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+                this.lookAt(lat, lng)
+                canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}))
+            }
         })(e, this.camera, this.canvas)
         
         const onPointerUp = (e) => {
@@ -84,14 +115,18 @@ class PanoControls {
         }
         
         const onDocumentMouseWheel = (e, camera, canvas) => {
-            const fov = camera.fov + e.deltaY * camera.fov / 1000;
-            camera.fov = MathUtils.clamp( fov, 0.0055, 160 );
-            camera.updateProjectionMatrix();
-            canvas.dispatchEvent(onFovChanged)
+            if(this.shouldTween){
+                fovVector = MathUtils.clamp(fovVector + e.deltaY * fovVector / 1000, 0.0055, 160 )
+            }else{
+                fov = MathUtils.clamp(fov + e.deltaY * fov / 1000, 0.0055, 160 )
+                canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}))
+            }
         }
 
-        this.canvas.addEventListener( 'pointerdown', onPointerDown );
-        document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera, this.canvas) );
+        this.canvas.addEventListener( 'pointerdown', onPointerDown )
+        document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera, this.canvas) )
+
+        this.lookAt(lat, lng)
     }
 
 }

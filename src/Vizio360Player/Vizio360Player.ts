@@ -4,16 +4,20 @@ import { MultiResPano } from './components/pano/MultiResPano';
 import { createHotspot, createHotspotXYZ } from './components/hotspot/hotspot';
 import { createScene } from './components/scene.js';
 import { createControls } from './systems/controls.js';
-import { latLngToPos } from './components/utils'
 
 import { createRenderer } from './systems/renderer.js';
 import { Resizer } from './systems/Resizer.js';
 import { Loop } from './systems/Loop.js';
 import { PanoControls } from './systems/PanoControls.js';
 
-import { Group, Mesh, Vector2, WebGLRenderer, PerspectiveCamera, Scene } from 'three';
+import { Mesh, WebGLRenderer, PerspectiveCamera, Scene } from 'three';
 
 //import Stats from 'stats.js'
+interface Coords {
+  lat: number,
+  lng: number,
+  fov: number
+}
 
 class Vizio360Player {
 
@@ -34,9 +38,13 @@ class Vizio360Player {
     this.loop = new Loop(this.camera, this.scene, this.renderer)
     container.append(this.renderer.domElement);
   
-    this.controls = createControls(this.camera, this.renderer.domElement);
+    this.controls = createControls(
+      this.camera,
+      this.renderer.domElement,
+      true
+    );
 
-    if(true){ //has preview
+    if(false){ //has preview
       createPreview({
         url: '/tiles/preview.jpg',
         striporder: 'lfrbud',
@@ -44,22 +52,24 @@ class Vizio360Player {
       }).then(res => {
         this.preview = res
         this.scene.add(this.preview)
-        this.pano = new MultiResPano(levels, source, this.controls)
+        this.pano = new MultiResPano(levels, source, this.controls, this.camera)
         const panoMesh = this.pano.createPano()
         this.scene.add(panoMesh)
+        this.updatePosition()
       })  
     }else{
-      this.pano = new MultiResPano(levels, source, this.controls)
+      this.pano = new MultiResPano(levels, source, this.controls, this.camera)
       this.scene.add(this.pano.createPano())
+
+      const pos = this.controls.getPosition()
+      this.controls.lookAt(pos.lat, pos.lng)
+
+      this.updatePosition()
     }
 
     this.resizer = new Resizer(container, this.camera, this.renderer);
 
-    this.loop.updatables.push(this.controls)
-
-    this.loop.updatables.push({tick(){
-      //
-    }});
+    this.loop.updatable.push(this.controls)
 
     this.renderer.domElement.addEventListener('onPanoClick', (e: CustomEvent) => this.onPanoClick(e))
     this.renderer.domElement.addEventListener('onCameraMove', (e: Event) => this.onCameraMove(e))
@@ -78,7 +88,7 @@ class Vizio360Player {
   }
 
   start() {
-    this.loop.start();
+    this.loop.start()
   }
   
   stop() {
@@ -90,13 +100,21 @@ class Vizio360Player {
   }
 
   onCameraMove(e: Event){
-    this.pano.onPosFovChanged( this.controls.getPosition(), this.controls.getFov(), this.preview, this.camera )
-    this.pano.addUpdateVisible()
+    this.updatePosition()
   }
 
   onFovChanged(e: Event){
-    this.pano.onPosFovChanged( this.controls.getPosition(), this.controls.getFov(), this.preview, this.camera )
+    this.updatePosition()
+  }
+
+  updatePosition(){
+    const pos = this.controls.getPosition()
+    this.pano.onPosFovChanged( pos )
     this.pano.addUpdateVisible()
+    if(this.camera.fov != pos.fov){
+      this.camera.fov = pos.fov
+      this.camera.updateProjectionMatrix()
+    }
   }
 
 }

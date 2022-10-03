@@ -64,7 +64,7 @@ const getMaterial = (canvas: HTMLCanvasElement) => {
     const texture = new CanvasTexture(canvas)
     const material = new MeshBasicMaterial( { map: texture, depthWrite: true } )
     material.side = BackSide
-    material.opacity = 0.25
+    material.opacity = 1
     material.transparent = true
     return material
 }
