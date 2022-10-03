@@ -62,11 +62,13 @@ export const tilesFor = (level: number, levelData: Level, bounds: SideBounds):Ar
     const tileBaseSize = tileBase + maxLevels - level
     const tileSizePart = tileSize / (size / tileBaseSize)
     const tiles = [];
-    const max = Math.round(tileBaseSize / tileSizePart)
+    const max = Math.ceil(tileBaseSize / tileSizePart)
+
     let xMin = minFor(bounds.x.min, max, 2)
     let xMax = maxFor(bounds.x.max, max, 2)
     let yMin = minFor(bounds.y.min, max, 2)
     let yMax = maxFor(bounds.y.max, max, 2)
+
     for(var x = xMin; x <= xMax; x ++){
         for(var y = yMin; y <= yMax; y ++){
             if( x >= xMin && x <= xMax && y >= yMin && y <= yMax ){

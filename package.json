@@ -1,6 +1,6 @@
 {
-  "name": "tvtpano",
-  "version": "1.0.0",
+  "name": "avanselviewer",
+  "version": "0.0.1",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -24,7 +24,6 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@tweenjs/tween.js": "^18.6.4",
     "three": "^0.143.0"
   }
 }

@@ -16,6 +16,8 @@ class PanoControls {
         this.camera = camera;
         this.canvas = canvas
         this.shouldTween = !!shouldTween
+        this.fovMax = 160;
+        this.fovMin = 0.0055;
         this.init()
     }
 
@@ -116,9 +118,9 @@ class PanoControls {
         
         const onDocumentMouseWheel = (e, camera, canvas) => {
             if(this.shouldTween){
-                fovVector = MathUtils.clamp(fovVector + e.deltaY * fovVector / 1000, 0.0055, 160 )
+                fovVector = MathUtils.clamp(fovVector + e.deltaY * fovVector / 1000, this.fovMin, this.fovMax )
             }else{
-                fov = MathUtils.clamp(fov + e.deltaY * fov / 1000, 0.0055, 160 )
+                fov = MathUtils.clamp(fov + e.deltaY * fov / 1000, this.fovMin, this.fovMax )
                 canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}))
             }
         }

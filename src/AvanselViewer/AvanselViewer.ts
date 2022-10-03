@@ -19,7 +19,7 @@ interface Coords {
   fov: number
 }
 
-class Vizio360Player {
+class AvanselViewer {
 
   camera: PerspectiveCamera
   renderer: WebGLRenderer
@@ -54,6 +54,8 @@ class Vizio360Player {
         this.pano = new MultiResPano(levels, source, this.controls, this.camera)
         const panoMesh = this.pano.createPano()
         this.scene.add(panoMesh)
+        const pos = this.controls.getPosition()
+        this.controls.lookAt(pos.lat, pos.lng)
         this.updatePosition()
       })  
     }else{
@@ -62,7 +64,6 @@ class Vizio360Player {
 
       const pos = this.controls.getPosition()
       this.controls.lookAt(pos.lat, pos.lng)
-
       this.updatePosition()
     }
 
@@ -118,4 +119,4 @@ class Vizio360Player {
 
 }
 
-export { Vizio360Player };
+export { AvanselViewer };

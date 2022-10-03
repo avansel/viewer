@@ -1,6 +1,6 @@
 import { Group, Mesh, Vector2, Raycaster, PerspectiveCamera, Vector3 } from 'three'
 import { createSide, updateSide, deleteSide } from './side.js'
-import { normLat, normLng, tilesFor } from '../utils'
+import { tilesFor } from '../utils'
 import { createCube } from './cube'
 import { tileBase, maxLevels } from '../../config.js'
 
@@ -26,7 +26,7 @@ class MultiResPano {
     this.controls = controls
     this.camera = camera
     this.visible = {
-      pixels: {},
+      pixels: [],
       maxLevel: 0,
       sides: {},
       meshes: []
@@ -48,6 +48,11 @@ class MultiResPano {
         number,
         visible: number >= this.pixelsMin && number <= this.pixelsMax
     }
+  }
+
+  minFov(size: number, max: number){
+    const height = this.controls.canvas.parentElement.clientHeight;
+    return (height * 100) / (size * 0.9 * max)
   }
 
   pointSideXY(point: Vector3){
@@ -93,7 +98,7 @@ class MultiResPano {
     const step = (max - min) / (size - 1)
     for(var x = min; x <= max; x += step){
       for(var y = min; y <= max; y += step){
-        screenPoints.push(new Vector2(  x,  y ))
+        screenPoints.push(new Vector2( x, y ))
       }
     }
     const raycaster = new Raycaster()
@@ -118,7 +123,7 @@ class MultiResPano {
           this.visible.sides[side].tiles[level] = tilesFor(
             levelInt,
             this.levels[level],
-            this.visible.sides[side].bounds
+            this.levels[level].fallback ? { x: { min: -1.1, max: 1.1 }, y: { min: -1.1, max: 1.1 } } : this.visible.sides[side].bounds
           )
           this.visible.meshes.push(level + '-' + side)
           this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
@@ -129,14 +134,14 @@ class MultiResPano {
             const side = sides[i]
             if(!this.visible.sides[side]){
               this.visible.sides[side] = { tiles: {} }
+              this.visible.sides[side].tiles[level] = tilesFor(
+                levelInt,
+                this.levels[level],
+                {x: { min: -1.1, max: 1.1 }, y: { min: -1.1, max: 1.1 } }
+              )
+              this.visible.meshes.push( level + '-' + side )
+              this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
             }
-            this.visible.sides[side].tiles[level] = tilesFor(
-              levelInt,
-              this.levels[level],
-              {x: { min: 0, max: 1 }, y: { min: 0, max: 1 } }
-            )
-            this.visible.meshes.push( level + '-' + side )
-            this.visible.meshes = [...this.visible.meshes, ...this.visible.sides[side].tiles[level].map(item => level + '-' + side + '-' + item.x + '-' + item.y)]
           }
         }
       }
@@ -158,6 +163,14 @@ class MultiResPano {
       if(item.visible && i > maxLevel) maxLevel = i
       this.visible.pixels[i] = item
     }
+    const lastLevel = this.visible.pixels.length - 1
+    if(
+      lastLevel
+      && !this.visible.pixels[lastLevel].visible
+      && this.visible.pixels[lastLevel].number > this.pixelsMax
+    ){
+      this.visible.pixels[lastLevel].visible = true
+    }
     this.visible.maxLevel = maxLevel
     if(!hasVisible){
       if(this.visible.pixels[0].number < this.pixelsMin) this.visible.pixels[0].visible = true
@@ -165,6 +178,7 @@ class MultiResPano {
     }
     this.visible.points = this.screenPoints(1.1, 5)
     this.visible.sides = this.sidesBounds()
+    this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 1.25)
     this.sidesVisibleTiles()
   }
 
