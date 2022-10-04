@@ -2,11 +2,18 @@
   "name": "avanselviewer",
   "version": "0.0.1",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
-  "keywords": ["threejs", "js", "panorama", "viewer", "multiresolution", "virtual tour"],
+  "keywords": [
+    "threejs",
+    "js",
+    "panorama",
+    "viewer",
+    "multiresolution",
+    "virtual tour"
+  ],
   "homepage": "https://avansel.com",
   "bugs": {
-    "url" : "https://github.com/romangrinev/avanselviewer/issues",
-    "email" : "roman@grinev.software"
+    "url": "https://github.com/romangrinev/avanselviewer/issues",
+    "email": "roman@grinev.software"
   },
   "main": "main.js",
   "scripts": {
@@ -23,8 +30,8 @@
   },
   "license": "MIT",
   "funding": {
-    "type" : "patreon",
-    "url" : "https://www.patreon.com/grinev"
+    "type": "patreon",
+    "url": "https://www.patreon.com/grinev"
   },
   "type": "module",
   "devDependencies": {
