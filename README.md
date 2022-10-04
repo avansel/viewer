@@ -62,11 +62,14 @@ We would like to extend our thanks to the following sponsors for funding Avansel
 
 ### Premium Partners
 
+* [Avansel](https://avansel.com)
 * [TrueVirtualTours](https://truevirtualtours.com)
 
 ## Contributing
 
-Thank you for considering contributing to the Avansel Viewer! The contribution guide can be found in the Laravel documentation.
+Thank you for considering contributing to the Avansel Viewer! 
+* Bug Reports
+
 
 ## Security Vulnerabilities
 

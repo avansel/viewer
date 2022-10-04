@@ -1,7 +1,7 @@
 import { AvanselViewer } from './AvanselViewer/AvanselViewer.ts'
 
 function main(){
-	const container = document.querySelector('#pano')
+	const container = document.querySelector('#avansel')
 
 	/*
   	const avansel = new AvanselViewer(container, [

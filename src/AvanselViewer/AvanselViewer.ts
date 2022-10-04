@@ -12,13 +12,6 @@ import { PanoControls } from './systems/PanoControls.js';
 
 import { Mesh, WebGLRenderer, PerspectiveCamera, Scene } from 'three';
 
-//import Stats from 'stats.js'
-interface Coords {
-  lat: number,
-  lng: number,
-  fov: number
-}
-
 class AvanselViewer {
 
   camera: PerspectiveCamera
