@@ -1,6 +1,6 @@
 {
   "name": "avanselviewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
   "keywords": [
     "threejs",
@@ -10,12 +10,17 @@
     "multiresolution",
     "virtual tour"
   ],
+  "main": "./dist/avanselviewer.js",
+  "type": "module",
+  "module": "./dist/avanselviewer.js",
+  "exports": {
+    ".": "./dist/avanselviewer.js"
+  },
   "homepage": "https://avansel.com",
   "bugs": {
     "url": "https://github.com/romangrinev/avanselviewer/issues",
     "email": "roman@grinev.software"
   },
-  "main": "main.js",
   "scripts": {
     "webpack": "webpack",
     "watch": "npm run webpack -- --mode development --watch",
@@ -33,16 +38,17 @@
     "type": "patreon",
     "url": "https://www.patreon.com/grinev"
   },
-  "type": "module",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@rollup/plugin-typescript": "^8.5.0",
     "@types/stats.js": "^0.17.0",
     "@types/three": "^0.143.1",
-    "@types/webpack-env": "^1.18.0",
     "express": "^4.18.1",
+    "rollup-plugin-gzip": "^3.0.1",
     "ts-loader": "^9.3.1",
-    "typescript": "^4.8.2",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.2"
   },
   "dependencies": {
     "three": "^0.143.0"

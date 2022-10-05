@@ -1,5 +1,5 @@
 
-import { PlaneGeometry, Mesh, MeshBasicMaterial, DoubleSide, TextureLoader, Vector3 } from 'three';
+import { PlaneGeometry, Mesh, MeshBasicMaterial, DoubleSide, TextureLoader } from 'three';
 import { tileBase, maxLevels } from '../../config.js'
 
 function createTile(name, side, level, data, source) {

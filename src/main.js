@@ -1,10 +1,9 @@
-import { AvanselViewer } from './AvanselViewer/AvanselViewer.ts'
+import { AvanselViewer } from '../dist/avanselviewer.js'
 
 function main(){
 	const container = document.querySelector('#avansel')
 
-	/*
-  	const avansel = new AvanselViewer(container, [
+	const avansel = new AvanselViewer(container, [
 			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
 			{ tileSize: 512, size: 512 * 2 ** 1 },
 			{ tileSize: 512, size: 512 * 2 ** 2 },
@@ -24,8 +23,7 @@ function main(){
 		],
 		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
 	)
-	*/
-
+	/*
 	const avansel = new AvanselViewer(container, [
 		{ tileSize: 512, size: 640, fallback: true },
 		{ tileSize: 512, size: 1280 },
@@ -38,7 +36,7 @@ function main(){
 		y = ((y + 1) + '').padStart(2, '0')
 		return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
 	})
-
+	*/
 	avansel.start()
 
 }

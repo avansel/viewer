@@ -11,6 +11,18 @@ There are some commercial solutions in the market but yet no opensource solution
 * Support multiresolution
 * Support hotspots, polygons, etc
 
+## Installing
+### Using npm
+
+```
+npm i avansel/viewer
+```
+Then in your .js file
+```
+npm i avansel/viewer
+```
+
+
 ## Multiresolution panorama viewer exampe
 
 index.html

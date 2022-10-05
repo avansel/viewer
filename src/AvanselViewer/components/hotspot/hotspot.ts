@@ -1,4 +1,4 @@
-import { SphereGeometry, MeshBasicMaterial, Mesh, MathUtils } from 'three'
+import { SphereGeometry, MeshBasicMaterial, Mesh } from 'three'
 import { latLngToPos } from '../utils'
 
 function createHotspot(lat: number, lng: number): Mesh {

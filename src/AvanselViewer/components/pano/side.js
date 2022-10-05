@@ -2,7 +2,6 @@
 import { Group, MathUtils } from 'three';
 import { createTile } from './tile.js';
 import { tileBase, maxLevels } from '../../config.js'
-import { tilesFor } from '../utils.ts'
 
 const sidePosition = (side, level) => {
     const tileBaseSize = tileBase + maxLevels - level
