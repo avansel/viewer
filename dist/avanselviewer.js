@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -29767,6 +29765,6 @@ class AvanselViewer {
         }
     }
 }
-exports.AvanselViewer = AvanselViewer;
-exports.Viewer = () => AvanselViewer;
+
+export { AvanselViewer };
 //# sourceMappingURL=avanselviewer.js.map

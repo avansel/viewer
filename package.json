@@ -1,6 +1,6 @@
 {
   "name": "avanselviewer",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
   "keywords": [
     "threejs",

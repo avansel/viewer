@@ -112,5 +112,4 @@ class AvanselViewer {
 
 }
 
-exports.AvanselViewer = AvanselViewer
-exports.Viewer = () => AvanselViewer
+export { AvanselViewer }
