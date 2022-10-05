@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 /**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -29769,6 +29767,6 @@ class AvanselViewer {
         }
     }
 }
-
 exports.AvanselViewer = AvanselViewer;
+exports.Viewer = () => AvanselViewer;
 //# sourceMappingURL=avanselviewer.js.map

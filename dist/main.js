@@ -1,9 +1,5 @@
 'use strict';
 
-var avanselviewer = {};
-
-Object.defineProperty(avanselviewer, '__esModule', { value: true });
-
 /**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -29771,8 +29767,7 @@ class AvanselViewer {
         }
     }
 }
-
-var AvanselViewer_1 = avanselviewer.AvanselViewer = AvanselViewer;
+var AvanselViewer_1 = AvanselViewer;
 
 function main(){
 	const container = document.querySelector('#avansel');
