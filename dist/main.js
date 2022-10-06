@@ -29517,7 +29517,8 @@ function createScene() {
   return scene;
 }
 
-let onPointerDownMouseX = 0, onPointerDownMouseY = 0,
+let touchType = null,
+onPointerDownMouseX = 0, onPointerDownMouseY = 0,
 lng = 90, lngVector = 90, onPointerDownLng = 0,
 lat = 0, latVector = 0, onPointerDownLat = 0,
 phi = 0, theta = 0,
@@ -29593,13 +29594,26 @@ class PanoControls {
 
         const onTouchStart = e => {
             var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
-            var touch = evt.touches[0] || evt.changedTouches[0];
+            var touches = evt.touches || evt.changedTouches;
+            if(touches.length == 1){
+                touchType = 'touch';
+            }else if(touches.length == 2){
+                touchType = 'zoom';
+            }
 
-            onPointerDownMouseX = touch.pageX;
-            onPointerDownMouseY = touch.pageY;
-        
-            onPointerDownLng = lng;
-            onPointerDownLat = lat;
+            console.log(touchType);
+
+            if(touchType == 'touch'){
+                var touch = touches[0];
+                onPointerDownMouseX = touch.pageX;
+                onPointerDownMouseY = touch.pageY;
+                onPointerDownLng = lng;
+                onPointerDownLat = lat;
+            }
+
+            if(touchType == 'zoom'){
+                e.preventDefault();
+            }
 
             document.addEventListener( 'touchmove', onTouchMove );
             document.addEventListener( 'touchend', onTouchUp );
@@ -29612,12 +29626,11 @@ class PanoControls {
             var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
             var touch = evt.touches[0] || evt.changedTouches[0];
 
-            if(this.shouldTween){
-                lngVector = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
-                latVector = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-            }else {
+            if(touchType == 'touch'){
                 lng = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
                 lat = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+                latVector = lat;
+                lngVector = lng;
                 this.lookAt(lat, lng);
                 canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}));
             }
@@ -29639,10 +29652,10 @@ class PanoControls {
             if ( e.isPrimary === false ) return;    
             onPointerDownMouseX = e.clientX;
             onPointerDownMouseY = e.clientY;
-        
+
             onPointerDownLng = lng;
             onPointerDownLat = lat;
-        
+
             document.addEventListener( 'pointermove', onPointerMove );
             document.addEventListener( 'pointerup', onPointerUp );
         };
