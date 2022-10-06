@@ -1,6 +1,6 @@
 {
   "name": "avanselviewer",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
   "keywords": [
     "threejs",
@@ -22,10 +22,9 @@
     "email": "roman@grinev.software"
   },
   "scripts": {
-    "webpack": "webpack",
     "watch": "npm run webpack -- --mode development --watch",
-    "dev": "npm run webpack -- --mode development",
-    "build": "npm run webpack -- --mode production",
+    "dev": "rollup -c .\\utils\\build\\rollup.config.js",
+    "build": "rollup -c .\\utils\\build\\rollup.main.config.js",
     "start": "node app.js"
   },
   "author": {

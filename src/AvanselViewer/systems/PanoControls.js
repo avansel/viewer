@@ -79,6 +79,49 @@ class PanoControls {
 
     init(){
 
+        // touch events
+
+        const onTouchStart = e => {
+            var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+            var touch = evt.touches[0] || evt.changedTouches[0];
+
+            onPointerDownMouseX = touch.pageX;
+            onPointerDownMouseY = touch.pageY;
+
+            onPointerDownLng = lng;
+            onPointerDownLat = lat;
+
+            document.addEventListener( 'touchmove', onTouchMove );
+            document.addEventListener( 'touchend', onTouchUp );
+            document.addEventListener( 'touchcancel', onTouchUp );
+        }
+
+        this.canvas.addEventListener('touchstart', onTouchStart)
+
+        const onTouchMove = e => ((e, camera, canvas) => {
+            var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+            var touch = evt.touches[0] || evt.changedTouches[0];
+
+            if(this.shouldTween){
+                lngVector = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
+                latVector = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+            }else{
+                lng = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
+                lat = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+                this.lookAt(lat, lng)
+                canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}))
+            }
+        })(e, this.camera, this.canvas)
+
+        const onTouchUp = (e) => {
+            if ( e.isPrimary === false ) return;
+            isUserInteracting = false;
+            document.removeEventListener( 'pointermove', onTouchMove );
+            document.removeEventListener( 'pointerup', onTouchUp );
+        }
+
+        // mouse events
+
         this.canvas.addEventListener( 'click', e => {
             this.canvas.dispatchEvent(new CustomEvent('onPanoClick', {detail: e}))
         })
@@ -88,15 +131,17 @@ class PanoControls {
             isUserInteracting = true;    
             onPointerDownMouseX = e.clientX;
             onPointerDownMouseY = e.clientY;
-        
+
             onPointerDownLng = lng;
             onPointerDownLat = lat;
-        
-            document.addEventListener( 'pointermove', _onPointerMove );
+
+            document.addEventListener( 'pointermove', onPointerMove );
             document.addEventListener( 'pointerup', onPointerUp );
         }
-        
-        const _onPointerMove = e => ((e, camera, canvas) => {
+
+        this.canvas.addEventListener( 'pointerdown', onPointerDown )
+
+        const onPointerMove = e => ((e, camera, canvas) => {
             if ( e.isPrimary === false ) return;
             if(this.shouldTween){
                 lngVector = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
@@ -112,7 +157,7 @@ class PanoControls {
         const onPointerUp = (e) => {
             if ( e.isPrimary === false ) return;
             isUserInteracting = false;
-            document.removeEventListener( 'pointermove', _onPointerMove );
+            document.removeEventListener( 'pointermove', onPointerMove );
             document.removeEventListener( 'pointerup', onPointerUp );
         }
         
@@ -125,7 +170,6 @@ class PanoControls {
             }
         }
 
-        this.canvas.addEventListener( 'pointerdown', onPointerDown )
         document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera, this.canvas) )
 
         this.lookAt(lat, lng)
