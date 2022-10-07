@@ -65,7 +65,7 @@ main()
 ```
 ## Examples
 
-* [Multi resolution/Petapixel sintetic panorama](https://jsfiddle.net/grinevri/8ntfmsxh/23/)
+* [Multi resolution/Petapixel sintetic panorama](https://jsfiddle.net/grinevri/8ntfmsxh/25/)
 
 ## Avansel Sponsors
 
