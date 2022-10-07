@@ -23,8 +23,8 @@
   },
   "scripts": {
     "watch": "npm run webpack -- --mode development --watch",
-    "dev": "rollup -c .\\utils\\build\\rollup.config.js -w",
-    "build": "rollup -c .\\utils\\build\\rollup.config.js",
+    "dev": "rollup -c ./utils/build/rollup.config.js -w",
+    "build": "rollup -c ./utils/build/rollup.config.js",
     "start": "node app.js"
   },
   "author": {
