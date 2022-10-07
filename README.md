@@ -17,11 +17,6 @@ There are some commercial solutions in the market but yet no opensource solution
 ```
 npm i avansel/viewer
 ```
-Then in your .js file
-```
-npm i avansel/viewer
-```
-
 
 ## Multiresolution panorama viewer exampe
 
@@ -70,7 +65,7 @@ main()
 ```
 ## Examples
 
-* [Multi resolution/Petapixel sintetic panorama](https://jsfiddle.net/grinevri/8ntfmsxh/23/)
+* [Multi resolution/Petapixel sintetic panorama](https://jsfiddle.net/grinevri/8ntfmsxh/25/)
 
 ## Avansel Sponsors
 
