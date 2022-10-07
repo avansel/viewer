@@ -4,12 +4,13 @@ import { normLng } from '../components/utils.ts'
 
 
 let isUserInteracting = false,
-touchType = null,
+onTouchDist, onTouchFov, touchType,
 onPointerDownMouseX = 0, onPointerDownMouseY = 0,
 lng = 90, lngVector = 90, onPointerDownLng = 0,
 lat = 0, latVector = 0, onPointerDownLat = 0,
 phi = 0, theta = 0,
 fov = 70, fovVector = 70
+
 
 class PanoControls {
 
@@ -83,17 +84,17 @@ class PanoControls {
         // touch events
 
         const onTouchStart = e => {
-            var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
-            var touches = evt.touches || evt.changedTouches
+
+            console.log('onTouchStart')
+
+            var touches = e.touches
             if(touches.length == 1){
                 touchType = 'touch'
             }else if(touches.length == 2){
                 touchType = 'zoom'
             }
 
-            console.log(touchType)
-
-            if(touchType == 'touch'){
+            if(touchType == 'touch' && e.type == 'touchstart'){
                 var touch = touches[0]
                 isUserInteracting = true
                 onPointerDownMouseX = touch.pageX
@@ -103,21 +104,37 @@ class PanoControls {
             }
 
             if(touchType == 'zoom'){
-                e.preventDefault()
+                onTouchDist = Math.hypot(
+                    touches[0].pageX - touches[1].pageX,
+                    touches[0].pageY - touches[1].pageY
+                )
+                onTouchFov = fov
             }
 
             document.addEventListener( 'touchmove', onTouchMove )
             document.addEventListener( 'touchend', onTouchUp )
             document.addEventListener( 'touchcancel', onTouchUp )
+            e.preventDefault()
         }
 
         this.canvas.addEventListener('touchstart', onTouchStart)
 
         const onTouchMove = e => ((e, camera, canvas) => {
-            var evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
-            var touch = evt.touches[0] || evt.changedTouches[0];
 
-            if(touchType == 'touch'){
+            var touches = e.touches
+            var newTouchType
+            if(touches.length == 1){
+                newTouchType = 'touch'
+            }else if(touches.length == 2){
+                newTouchType = 'zoom'
+            }
+            console.log(touchType, newTouchType)
+            if(touchType != newTouchType){
+                return null
+            }
+
+            if(touchType == 'touch' && e.type == 'touchmove'){
+                var touch = touches[0]
                 lng = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
                 lat = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
                 latVector = lat
@@ -125,6 +142,18 @@ class PanoControls {
                 this.lookAt(lat, lng)
                 canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}))
             }
+
+            if(touchType == 'zoom' && e.type == 'touchmove'){
+                var dist = Math.hypot(
+                    touches[0].pageX - touches[1].pageX,
+                    touches[0].pageY - touches[1].pageY
+                )
+                var diff = onTouchDist - dist
+                fov = MathUtils.clamp( onTouchFov + diff * onTouchFov / 500, this.fovMin, this.fovMax )
+                fovVector = fov
+                canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}))
+            }
+
         })(e, this.camera, this.canvas)
 
         const onTouchUp = (e) => {
@@ -132,6 +161,7 @@ class PanoControls {
             isUserInteracting = false;
             document.removeEventListener( 'pointermove', onTouchMove );
             document.removeEventListener( 'pointerup', onTouchUp );
+            touchType = null
         }
 
         // mouse events
@@ -149,6 +179,8 @@ class PanoControls {
             onPointerDownLng = lng;
             onPointerDownLat = lat;
 
+            //console.log('onPointerDown', e)
+
             document.addEventListener( 'pointermove', onPointerMove );
             document.addEventListener( 'pointerup', onPointerUp );
         }
@@ -157,14 +189,16 @@ class PanoControls {
 
         const onPointerMove = e => ((e, camera, canvas) => {
             if ( e.isPrimary === false ) return;
-            if(this.shouldTween){
-                lngVector = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
-                latVector = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-            }else{
-                lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
-                lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-                this.lookAt(lat, lng)
-                canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}))
+            if(e.pointerType == 'mouse'){
+                if(this.shouldTween){
+                    lngVector = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
+                    latVector = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+                }else{
+                    lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
+                    lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
+                    this.lookAt(lat, lng)
+                    canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}))
+                }
             }
         })(e, this.camera, this.canvas)
         
