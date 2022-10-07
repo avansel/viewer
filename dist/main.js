@@ -28916,41 +28916,6 @@ class ImageLoader extends Loader {
 
 }
 
-class TextureLoader extends Loader {
-
-	constructor( manager ) {
-
-		super( manager );
-
-	}
-
-	load( url, onLoad, onProgress, onError ) {
-
-		const texture = new Texture();
-
-		const loader = new ImageLoader( this.manager );
-		loader.setCrossOrigin( this.crossOrigin );
-		loader.setPath( this.path );
-
-		loader.load( url, function ( image ) {
-
-			texture.image = image;
-			texture.needsUpdate = true;
-
-			if ( onLoad !== undefined ) {
-
-				onLoad( texture );
-
-			}
-
-		}, onProgress, onError );
-
-		return texture;
-
-	}
-
-}
-
 class Clock {
 
 	constructor( autoStart = true ) {
@@ -29185,6 +29150,35 @@ var StripType;
     StripType[StripType["Type6x1"] = 3] = "Type6x1";
 })(StripType || (StripType = {}));
 
+class TextureLoader extends Loader {
+
+	constructor( manager ) {
+		super( manager );
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+		const texture = new Texture();
+		const loader = new ImageLoader( this.manager );
+		loader.setCrossOrigin( this.crossOrigin );
+		loader.setPath( this.path );
+		var image = loader.load( url, function ( image ) {
+			texture.image = image;
+			texture.needsUpdate = true;
+			if ( onLoad !== undefined ) {
+				onLoad( texture );
+			}
+		}, onProgress, onError );
+
+        texture.abort = () => {
+            if(image && typeof image.hasAttribute === 'function'){
+                image.src = '';
+            }
+        };
+
+        return texture;
+	}
+}
+
 function createTile(name, side, level, data, source) {
     const url = source()(side, level, data.x, data.y);
     const tileBaseSize = tileBase + maxLevels - level;
@@ -29194,9 +29188,7 @@ function createTile(name, side, level, data, source) {
     const geometry = new PlaneGeometry(data.width, data.height);
     
     let material;
-    
     material = new MeshBasicMaterial({ map: new TextureLoader().load(url), depthWrite: true, transparent: true, opacity: 1});
-
     material.side = DoubleSide;
     const tile = new Mesh(geometry, material);
     tile.name = name;
@@ -29261,7 +29253,11 @@ function updateSide(group, side, level, tiles, source, meshes) {
 
 function deleteSide(group) {
     for(var i = group.children.length - 1; i >= 0; i--){
-        group.remove( group.children[i] );
+        const tile = group.children[i];
+        tile.material.map.abort();
+        tile.geometry.dispose();
+        tile.material.dispose();
+        group.remove( tile );
     }
 }
 
@@ -29879,7 +29875,7 @@ function main(){
 			{ tileSize: 512, size: 512 * 2 ** 14 },
 			{ tileSize: 512, size: 512 * 2 ** 15 }
 		],
-		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
+		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=512&side=${s}&x=${x}&y=${y}&level=${l}`
 	);
 	/*
 	const avansel = new AvanselViewer(container, [

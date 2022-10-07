@@ -69,7 +69,11 @@ function updateSide(group, side, level, tiles, source, meshes) {
 
 function deleteSide(group) {
     for(var i = group.children.length - 1; i >= 0; i--){
-        group.remove( group.children[i] );
+        const tile = group.children[i]
+        tile.material.map.abort()
+        tile.geometry.dispose()
+        tile.material.dispose()
+        group.remove( tile );
     }
 }
 
