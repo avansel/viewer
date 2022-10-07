@@ -17,11 +17,6 @@ There are some commercial solutions in the market but yet no opensource solution
 ```
 npm i avansel/viewer
 ```
-Then in your .js file
-```
-npm i avansel/viewer
-```
-
 
 ## Multiresolution panorama viewer exampe
 
