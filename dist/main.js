@@ -29242,13 +29242,15 @@ function updateSide(group, side, level, tiles, source, meshes) {
             group.add(createTile(name, side, level, data, source));
         }
     }
-    /*
     for(var i = group.children.length - 1; i >= 0; i--){
         if(!meshes.includes(group.children[i].name)){
-            group.remove( group.children[i] );
+            const tile = group.children[i];
+            tile.material.map.abort();
+            tile.geometry.dispose();
+            tile.material.dispose();
+            group.remove( tile );
         }
     }
-    */
 }
 
 function deleteSide(group) {
@@ -29875,7 +29877,7 @@ function main(){
 			{ tileSize: 512, size: 512 * 2 ** 14 },
 			{ tileSize: 512, size: 512 * 2 ** 15 }
 		],
-		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=512&side=${s}&x=${x}&y=${y}&level=${l}`
+		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
 	);
 	/*
 	const avansel = new AvanselViewer(container, [

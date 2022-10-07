@@ -29240,13 +29240,15 @@ function updateSide(group, side, level, tiles, source, meshes) {
             group.add(createTile(name, side, level, data, source));
         }
     }
-    /*
     for(var i = group.children.length - 1; i >= 0; i--){
         if(!meshes.includes(group.children[i].name)){
-            group.remove( group.children[i] );
+            const tile = group.children[i];
+            tile.material.map.abort();
+            tile.geometry.dispose();
+            tile.material.dispose();
+            group.remove( tile );
         }
     }
-    */
 }
 
 function deleteSide(group) {
