@@ -29276,7 +29276,8 @@ if ( typeof window !== 'undefined' ) {
 
 var pano = {
 	tileBase: 100,
-	maxLevels: 16
+	maxLevels: 16,
+	pixelZoom: 2
 };
 var camera = {
 	fov: 70,
@@ -29653,7 +29654,7 @@ class Sphere {
         const texture = new TextureLoader$1().load(source, (texture) => {
             const pd = texture.source.data.width / 360;
             const fovMin = controls.canvas.clientWidth / pd;
-            controls.fovMin = fovMin / 2;
+            controls.fovMin = fovMin / pano.pixelZoom;
         });
         const material = new MeshBasicMaterial({ map: texture });
         this.instance = new Mesh(geometry, material);
@@ -29962,7 +29963,7 @@ class Multires {
         }
         this.visible.points = this.screenPoints(1.1, 5);
         this.visible.sides = this.sidesBounds();
-        this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 2);
+        this.controls.fovMin = this.minFov(this.levels[lastLevel].size, pano.pixelZoom);
         this.sidesVisibleTiles();
     }
     addUpdateVisible() {
