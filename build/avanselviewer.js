@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -28583,6 +28581,128 @@ class Scene extends Object3D {
 
 }
 
+class SphereGeometry extends BufferGeometry {
+
+	constructor( radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI ) {
+
+		super();
+
+		this.type = 'SphereGeometry';
+
+		this.parameters = {
+			radius: radius,
+			widthSegments: widthSegments,
+			heightSegments: heightSegments,
+			phiStart: phiStart,
+			phiLength: phiLength,
+			thetaStart: thetaStart,
+			thetaLength: thetaLength
+		};
+
+		widthSegments = Math.max( 3, Math.floor( widthSegments ) );
+		heightSegments = Math.max( 2, Math.floor( heightSegments ) );
+
+		const thetaEnd = Math.min( thetaStart + thetaLength, Math.PI );
+
+		let index = 0;
+		const grid = [];
+
+		const vertex = new Vector3();
+		const normal = new Vector3();
+
+		// buffers
+
+		const indices = [];
+		const vertices = [];
+		const normals = [];
+		const uvs = [];
+
+		// generate vertices, normals and uvs
+
+		for ( let iy = 0; iy <= heightSegments; iy ++ ) {
+
+			const verticesRow = [];
+
+			const v = iy / heightSegments;
+
+			// special case for the poles
+
+			let uOffset = 0;
+
+			if ( iy == 0 && thetaStart == 0 ) {
+
+				uOffset = 0.5 / widthSegments;
+
+			} else if ( iy == heightSegments && thetaEnd == Math.PI ) {
+
+				uOffset = - 0.5 / widthSegments;
+
+			}
+
+			for ( let ix = 0; ix <= widthSegments; ix ++ ) {
+
+				const u = ix / widthSegments;
+
+				// vertex
+
+				vertex.x = - radius * Math.cos( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+				vertex.y = radius * Math.cos( thetaStart + v * thetaLength );
+				vertex.z = radius * Math.sin( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+
+				vertices.push( vertex.x, vertex.y, vertex.z );
+
+				// normal
+
+				normal.copy( vertex ).normalize();
+				normals.push( normal.x, normal.y, normal.z );
+
+				// uv
+
+				uvs.push( u + uOffset, 1 - v );
+
+				verticesRow.push( index ++ );
+
+			}
+
+			grid.push( verticesRow );
+
+		}
+
+		// indices
+
+		for ( let iy = 0; iy < heightSegments; iy ++ ) {
+
+			for ( let ix = 0; ix < widthSegments; ix ++ ) {
+
+				const a = grid[ iy ][ ix + 1 ];
+				const b = grid[ iy ][ ix ];
+				const c = grid[ iy + 1 ][ ix ];
+				const d = grid[ iy + 1 ][ ix + 1 ];
+
+				if ( iy !== 0 || thetaStart > 0 ) indices.push( a, b, d );
+				if ( iy !== heightSegments - 1 || thetaEnd < Math.PI ) indices.push( b, c, d );
+
+			}
+
+		}
+
+		// build geometry
+
+		this.setIndex( indices );
+		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
+
+	}
+
+	static fromJSON( data ) {
+
+		return new SphereGeometry( data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength );
+
+	}
+
+}
+
 const Cache = {
 
 	enabled: false,
@@ -28911,6 +29031,41 @@ class ImageLoader extends Loader {
 		image.src = url;
 
 		return image;
+
+	}
+
+}
+
+class TextureLoader$1 extends Loader {
+
+	constructor( manager ) {
+
+		super( manager );
+
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+
+		const texture = new Texture();
+
+		const loader = new ImageLoader( this.manager );
+		loader.setCrossOrigin( this.crossOrigin );
+		loader.setPath( this.path );
+
+		loader.load( url, function ( image ) {
+
+			texture.image = image;
+			texture.needsUpdate = true;
+
+			if ( onLoad !== undefined ) {
+
+				onLoad( texture );
+
+			}
+
+		}, onProgress, onError );
+
+		return texture;
 
 	}
 
@@ -29509,6 +29664,15 @@ class MultiResPano {
     }
 }
 
+function createSphere(source) {
+    console.log('there4');
+    const geometry = new SphereGeometry(tileBase, 25, 16, 100);
+    geometry.scale(-1, 1, 1);
+    const texture = new TextureLoader$1().load(source);
+    const material = new MeshBasicMaterial({ map: texture });
+    return new Mesh(geometry, material);
+}
+
 function createScene() {
   const scene = new Scene();
 
@@ -29809,12 +29973,17 @@ class AvanselViewer {
         this.loop = new Loop(this.camera, this.scene, this.renderer);
         container.append(this.renderer.domElement);
         this.controls = createControls(this.camera, this.renderer.domElement, true);
-        {
+        if (levels.length > 0 && typeof source == 'function') {
             this.pano = new MultiResPano(levels, source, this.controls, this.camera);
             this.scene.add(this.pano.createPano());
             const pos = this.controls.getPosition();
             this.controls.lookAt(pos.lat, pos.lng);
             this.updatePosition();
+        }
+        else {
+            this.scene.add(createSphere('/files/examples/pano-8000.jpg'));
+            const pos = this.controls.getPosition();
+            this.controls.lookAt(pos.lat, pos.lng);
         }
         this.resizer = new Resizer(container, this.camera, this.renderer);
         this.loop.updatable.push(this.controls);
@@ -29856,46 +30025,5 @@ class AvanselViewer {
     }
 }
 
-function main(){
-	const container = document.querySelector('#avansel');
-
-	const avansel = new AvanselViewer(container, [
-			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
-			{ tileSize: 512, size: 512 * 2 ** 1 },
-			{ tileSize: 512, size: 512 * 2 ** 2 },
-			{ tileSize: 512, size: 512 * 2 ** 3 },
-			{ tileSize: 512, size: 512 * 2 ** 4 },
-			{ tileSize: 512, size: 512 * 2 ** 5 },
-			{ tileSize: 512, size: 512 * 2 ** 6 },
-			{ tileSize: 512, size: 512 * 2 ** 7 },
-			{ tileSize: 512, size: 512 * 2 ** 8 },
-			{ tileSize: 512, size: 512 * 2 ** 9 },
-			{ tileSize: 512, size: 512 * 2 ** 10 },
-			{ tileSize: 512, size: 512 * 2 ** 11 },
-			{ tileSize: 512, size: 512 * 2 ** 12 },
-			{ tileSize: 512, size: 512 * 2 ** 13 },
-			{ tileSize: 512, size: 512 * 2 ** 14 },
-			{ tileSize: 512, size: 512 * 2 ** 15 }
-		],
-		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
-	);
-	/*
-	const avansel = new AvanselViewer(container, [
-		{ tileSize: 512, size: 640, fallback: true },
-		{ tileSize: 512, size: 1280 },
-		{ tileSize: 512, size: 2560 },
-		{ tileSize: 512, size: 4864 },
-	],
-	() => (s, l, x, y) => {
-		l = parseInt(l) + 1
-		x = ((x + 1) + '').padStart(2, '0')
-		y = ((y + 1) + '').padStart(2, '0')
-		return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
-	})
-	*/
-	avansel.start();
-
-}
-
-main();
-//# sourceMappingURL=main.js.map
+export { AvanselViewer };
+//# sourceMappingURL=avanselviewer.js.map

@@ -1,6 +1,6 @@
 
 import { PlaneGeometry, Mesh, MeshBasicMaterial, DoubleSide, ImageLoader, Texture, Loader } from 'three';
-import { tileBase, maxLevels } from '../../config.js'
+import { pano } from '../../config.json'
 
 class TextureLoader extends Loader {
 
@@ -33,7 +33,7 @@ class TextureLoader extends Loader {
 
 function createTile(name, side, level, data, source) {
     const url = source()(side, level, data.x, data.y)
-    const tileBaseSize = tileBase + maxLevels - level
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level
     const half = tileBaseSize / 2
     const offsetX = data.width / 2 - half + data.offsetX
     const offsetY = half - data.height / 2 - data.offsetY

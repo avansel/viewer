@@ -2,29 +2,30 @@ import { Group, Mesh, Vector2, Raycaster, PerspectiveCamera, Vector3 } from 'thr
 import { createSide, updateSide, deleteSide } from './side.js'
 import { tilesFor } from '../utils'
 import { createCube } from './cube'
-import { tileBase, maxLevels } from '../../config.js'
+import { pano } from '../../config.json'
+import Controls from '../../systems/Controls.js'
 
-class MultiResPano {
+class Multires {
 
-  levels: Array<any>;
-  source: Function | string;
-  controls: any;
-  camera: PerspectiveCamera;
-  pano: Group;
-  pos: Object;
-  fov: number;
-  visible: any;
-  pixelsMin: number;
-  pixelsMax: number;
-  cube: Mesh;
+  levels: Array<any>
+  source: Function | string
+  controls: Controls
+  camera: PerspectiveCamera
+  instance: Group
+  pos: Object
+  fov: number
+  visible: any
+  pixelsMin: number
+  pixelsMax: number
+  cube: Mesh
 
-  constructor(levels: Array<any>, source: Function | string, controls: any, camera: PerspectiveCamera) {
+  constructor(levels: Array<any>, source: Function | string, controls: Controls) {
     this.pixelsMin = 0.5
     this.pixelsMax = 5
-    this.levels = levels;
-    this.source = source;
+    this.levels = levels
+    this.source = source
     this.controls = controls
-    this.camera = camera
+    this.camera = controls.camera.get()
     this.visible = {
       pixels: [],
       maxLevel: 0,
@@ -32,13 +33,20 @@ class MultiResPano {
       meshes: []
     }
     this.cube = createCube()
+
+    this.controls.canvas.addEventListener( 'cameraMove', this.onCameraMove.bind(this) )
+    this.controls.canvas.addEventListener( 'fovChanged', this.onFovChanged.bind(this) )
+  }
+
+  get(): Group{
+    return this.instance
   }
 
   createPano(){
-    this.pano = new Group();
-    this.pano.renderOrder = 2
-    this.pano.name = 'multires-pano'
-    return this.pano;
+    this.instance = new Group();
+    this.instance.renderOrder = 2
+    this.instance.name = 'multires-pano'
+    return this.instance
   }
 
   pixelsBySize(size: number, fov: number){
@@ -56,7 +64,7 @@ class MultiResPano {
   }
 
   pointSideXY(point: Vector3){
-    const size = ( maxLevels + tileBase + 2 )
+    const size = ( pano.maxLevels + pano.tileBase + 2 )
     const mul = 1000000
     const hs = size / 2
     const hsMul = (hs * mul)
@@ -148,6 +156,26 @@ class MultiResPano {
     }
   }
 
+
+
+  onCameraMove(e: Event){
+    this.updatePosition()
+  }
+
+  onFovChanged(e: Event){
+    this.updatePosition()
+  }
+
+  updatePosition(){
+    const pos = this.controls.position()
+    this.onPosFovChanged( pos )
+    this.addUpdateVisible()
+    if(this.camera.fov != pos.fov){
+      this.camera.fov = pos.fov
+      this.camera.updateProjectionMatrix()
+    }
+  }
+
   onPosFovChanged(pos: any){
     this.calcVisibleData(pos)
   }
@@ -178,7 +206,7 @@ class MultiResPano {
     }
     this.visible.points = this.screenPoints(1.1, 5)
     this.visible.sides = this.sidesBounds()
-    this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 1.25)
+    this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 2)
     this.sidesVisibleTiles()
   }
 
@@ -187,15 +215,15 @@ class MultiResPano {
       for(var level in this.visible.sides[side].tiles){
         const tiles = this.visible.sides[side].tiles[level]
         const name = level + '-' + side
-        const group = this.pano.getObjectByName(name)
+        const group = this.instance.getObjectByName(name)
         if(group){
           updateSide(group, side, level, tiles, this.source, this.visible.meshes)
         }else{
-          this.pano.add(createSide(side, level, tiles, this.source))
+          this.instance.add(createSide(side, level, tiles, this.source))
         }
       }
     }
-    const groups = this.pano.children.map(item => item.name)
+    const groups = this.instance.children.map(item => item.name)
     for(var i = groups.length - 1; i >= 0; i --){
       const name = groups[i]
       const [ level ] = name.split('-')
@@ -203,16 +231,16 @@ class MultiResPano {
         !this.visible.meshes.includes(name)
         && !this.levels[level].fallback
       ){
-        const group = this.pano.getObjectByName(name)
+        const group = this.instance.getObjectByName(name)
         if(group){
           deleteSide(group)
-          this.pano.remove(group)
+          this.instance.remove(group)
         }
       }
     }
-    return this.pano
+    return this.instance
   }
+
 }
 
-
-export { MultiResPano };
+export { Multires }

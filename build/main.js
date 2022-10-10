@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * @license
  * Copyright 2010-2022 Three.js Authors
@@ -5299,7 +5301,7 @@ const _v1$6 = /*@__PURE__*/ new Vector3();
 const _toFarthestPoint = /*@__PURE__*/ new Vector3();
 const _toPoint = /*@__PURE__*/ new Vector3();
 
-class Sphere {
+class Sphere$1 {
 
 	constructor( center = new Vector3(), radius = - 1 ) {
 
@@ -9810,7 +9812,7 @@ class BufferGeometry extends EventDispatcher {
 
 		if ( this.boundingSphere === null ) {
 
-			this.boundingSphere = new Sphere();
+			this.boundingSphere = new Sphere$1();
 
 		}
 
@@ -10578,7 +10580,7 @@ class BufferGeometry extends EventDispatcher {
 
 const _inverseMatrix$2 = /*@__PURE__*/ new Matrix4();
 const _ray$2 = /*@__PURE__*/ new Ray();
-const _sphere$3 = /*@__PURE__*/ new Sphere();
+const _sphere$3 = /*@__PURE__*/ new Sphere$1();
 
 const _vA$1 = /*@__PURE__*/ new Vector3();
 const _vB$1 = /*@__PURE__*/ new Vector3();
@@ -11390,7 +11392,7 @@ class ShaderMaterial extends Material {
 
 }
 
-class Camera extends Object3D {
+class Camera$1 extends Object3D {
 
 	constructor() {
 
@@ -11454,7 +11456,7 @@ class Camera extends Object3D {
 
 }
 
-class PerspectiveCamera extends Camera {
+class PerspectiveCamera extends Camera$1 {
 
 	constructor( fov = 50, aspect = 1, near = 0.1, far = 2000 ) {
 
@@ -12157,7 +12159,7 @@ class Plane {
 
 }
 
-const _sphere$2 = /*@__PURE__*/ new Sphere();
+const _sphere$2 = /*@__PURE__*/ new Sphere$1();
 const _vector$7 = /*@__PURE__*/ new Vector3();
 
 class Frustum {
@@ -14858,7 +14860,7 @@ function WebGLCubeMaps( renderer ) {
 
 }
 
-class OrthographicCamera extends Camera {
+class OrthographicCamera extends Camera$1 {
 
 	constructor( left = - 1, right = 1, top = 1, bottom = - 1, near = 0.1, far = 2000 ) {
 
@@ -28526,7 +28528,7 @@ class WebGL1Renderer extends WebGLRenderer {}
 
 WebGL1Renderer.prototype.isWebGL1Renderer = true;
 
-class Scene extends Object3D {
+class Scene$1 extends Object3D {
 
 	constructor() {
 
@@ -28576,6 +28578,128 @@ class Scene extends Object3D {
 		if ( this.fog !== null ) data.object.fog = this.fog.toJSON();
 
 		return data;
+
+	}
+
+}
+
+class SphereGeometry extends BufferGeometry {
+
+	constructor( radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI ) {
+
+		super();
+
+		this.type = 'SphereGeometry';
+
+		this.parameters = {
+			radius: radius,
+			widthSegments: widthSegments,
+			heightSegments: heightSegments,
+			phiStart: phiStart,
+			phiLength: phiLength,
+			thetaStart: thetaStart,
+			thetaLength: thetaLength
+		};
+
+		widthSegments = Math.max( 3, Math.floor( widthSegments ) );
+		heightSegments = Math.max( 2, Math.floor( heightSegments ) );
+
+		const thetaEnd = Math.min( thetaStart + thetaLength, Math.PI );
+
+		let index = 0;
+		const grid = [];
+
+		const vertex = new Vector3();
+		const normal = new Vector3();
+
+		// buffers
+
+		const indices = [];
+		const vertices = [];
+		const normals = [];
+		const uvs = [];
+
+		// generate vertices, normals and uvs
+
+		for ( let iy = 0; iy <= heightSegments; iy ++ ) {
+
+			const verticesRow = [];
+
+			const v = iy / heightSegments;
+
+			// special case for the poles
+
+			let uOffset = 0;
+
+			if ( iy == 0 && thetaStart == 0 ) {
+
+				uOffset = 0.5 / widthSegments;
+
+			} else if ( iy == heightSegments && thetaEnd == Math.PI ) {
+
+				uOffset = - 0.5 / widthSegments;
+
+			}
+
+			for ( let ix = 0; ix <= widthSegments; ix ++ ) {
+
+				const u = ix / widthSegments;
+
+				// vertex
+
+				vertex.x = - radius * Math.cos( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+				vertex.y = radius * Math.cos( thetaStart + v * thetaLength );
+				vertex.z = radius * Math.sin( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
+
+				vertices.push( vertex.x, vertex.y, vertex.z );
+
+				// normal
+
+				normal.copy( vertex ).normalize();
+				normals.push( normal.x, normal.y, normal.z );
+
+				// uv
+
+				uvs.push( u + uOffset, 1 - v );
+
+				verticesRow.push( index ++ );
+
+			}
+
+			grid.push( verticesRow );
+
+		}
+
+		// indices
+
+		for ( let iy = 0; iy < heightSegments; iy ++ ) {
+
+			for ( let ix = 0; ix < widthSegments; ix ++ ) {
+
+				const a = grid[ iy ][ ix + 1 ];
+				const b = grid[ iy ][ ix ];
+				const c = grid[ iy + 1 ][ ix ];
+				const d = grid[ iy + 1 ][ ix + 1 ];
+
+				if ( iy !== 0 || thetaStart > 0 ) indices.push( a, b, d );
+				if ( iy !== heightSegments - 1 || thetaEnd < Math.PI ) indices.push( b, c, d );
+
+			}
+
+		}
+
+		// build geometry
+
+		this.setIndex( indices );
+		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
+
+	}
+
+	static fromJSON( data ) {
+
+		return new SphereGeometry( data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength );
 
 	}
 
@@ -28914,6 +29038,41 @@ class ImageLoader extends Loader {
 
 }
 
+class TextureLoader$1 extends Loader {
+
+	constructor( manager ) {
+
+		super( manager );
+
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+
+		const texture = new Texture();
+
+		const loader = new ImageLoader( this.manager );
+		loader.setCrossOrigin( this.crossOrigin );
+		loader.setPath( this.path );
+
+		loader.load( url, function ( image ) {
+
+			texture.image = image;
+			texture.needsUpdate = true;
+
+			if ( onLoad !== undefined ) {
+
+				onLoad( texture );
+
+			}
+
+		}, onProgress, onError );
+
+		return texture;
+
+	}
+
+}
+
 class Clock {
 
 	constructor( autoStart = true ) {
@@ -29115,38 +29274,394 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
-function createCamera(container) {
+var pano = {
+	tileBase: 100,
+	maxLevels: 16
+};
+var camera = {
+	fov: 70,
+	near: 0.1,
+	far: 200
+};
+var renderer = {
+	antialias: true
+};
+var controls = {
+	fovMin: 0.0055,
+	fovMax: 130,
+	moveFactor: 1.5
+};
 
-  const fov = 70;
-  const aspect = container.clientWidth / container.clientHeight;
-  const near = 0.1;
-  const far = 200;
-
-  const camera = new PerspectiveCamera(fov, aspect, near, far);
-
-  camera.position.set(0, 0, 0);
-
-  camera.tick = (delta) => { };
-
-  return camera;
+class Renderer {
+    constructor(container) {
+        this.instance = new WebGLRenderer({ antialias: renderer.antialias });
+        this.container = container;
+        this.container.append(this.instance.domElement);
+    }
+    setSize() {
+        this.instance.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.instance.setPixelRatio(window.devicePixelRatio);
+    }
+    get() {
+        return this.instance;
+    }
 }
 
-const tileBase = 100;
-const maxLevels = 16;
+const clock = new Clock();
+class Loop {
+    constructor(camera, scene, renderer) {
+        this.camera = camera.get();
+        this.scene = scene.get();
+        this.renderer = renderer.get();
+        this.updatable = [];
+    }
+    start() {
+        this.renderer.setAnimationLoop((t) => {
+            this.tick();
+            this.renderer.render(this.scene, this.camera);
+        });
+    }
+    stop() {
+        this.renderer.setAnimationLoop(null);
+    }
+    tick() {
+        const delta = clock.getDelta();
+        for (const object of this.updatable) {
+            object.tick(delta);
+        }
+    }
+}
 
-var ImageType;
-(function (ImageType) {
-    ImageType[ImageType["Sphere"] = 0] = "Sphere";
-    ImageType[ImageType["Cylinder"] = 1] = "Cylinder";
-    ImageType[ImageType["Cubestrip"] = 2] = "Cubestrip";
-})(ImageType || (ImageType = {}));
-var StripType;
-(function (StripType) {
-    StripType[StripType["Type1x6"] = 0] = "Type1x6";
-    StripType[StripType["Type2x3"] = 1] = "Type2x3";
-    StripType[StripType["Type3x2"] = 2] = "Type3x2";
-    StripType[StripType["Type6x1"] = 3] = "Type6x1";
-})(StripType || (StripType = {}));
+const minFor = (value, count, extend) => {
+    value = Math.round(value * count) - extend;
+    if (value < 0)
+        value = 0;
+    return value;
+};
+const maxFor = (value, count, extend) => {
+    value = Math.round(value * count) + extend;
+    if (value > (count - 1))
+        value = count - 1;
+    return value;
+};
+const tilesFor = (level, levelData, bounds) => {
+    var _a, _b;
+    if (!((_a = bounds === null || bounds === void 0 ? void 0 : bounds.x) === null || _a === void 0 ? void 0 : _a.min) && !((_b = bounds === null || bounds === void 0 ? void 0 : bounds.x) === null || _b === void 0 ? void 0 : _b.max))
+        return [];
+    const { tileSize, size } = levelData;
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level;
+    const tileSizePart = tileSize / (size / tileBaseSize);
+    const tiles = [];
+    const max = Math.ceil(tileBaseSize / tileSizePart);
+    let xMin = minFor(bounds.x.min, max, 2);
+    let xMax = maxFor(bounds.x.max, max, 2);
+    let yMin = minFor(bounds.y.min, max, 2);
+    let yMax = maxFor(bounds.y.max, max, 2);
+    for (var x = xMin; x <= xMax; x++) {
+        for (var y = yMin; y <= yMax; y++) {
+            if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
+                const offsetX = x * tileSizePart;
+                const offsetY = y * tileSizePart;
+                const width = ((x + 1) * tileSizePart) > tileBaseSize ? (tileBaseSize - x * tileSizePart) : tileSizePart;
+                const height = ((y + 1) * tileSizePart) > tileBaseSize ? (tileBaseSize - y * tileSizePart) : tileSizePart;
+                tiles.push({ x, y, offsetX, offsetY, width, height });
+            }
+        }
+    }
+    return tiles;
+};
+const normLng = (lng) => {
+    while (lng > 360)
+        lng -= 360;
+    while (lng < 0)
+        lng += 360;
+    return lng;
+};
+
+var TouchType;
+(function (TouchType) {
+    TouchType[TouchType["Touch"] = 0] = "Touch";
+    TouchType[TouchType["Zoom"] = 1] = "Zoom";
+})(TouchType || (TouchType = {}));
+class Controls {
+    constructor(camera, canvas) {
+        this.camera = camera;
+        this.canvas = canvas;
+        this.tween = true;
+        this.fovMax = controls.fovMax;
+        this.fovMin = controls.fovMin;
+        this.isInteracting = false;
+        this.onMouseDownMouseX = 0;
+        this.onMouseDownMouseY = 0;
+        this.lng = 90;
+        this.lngVector = 90;
+        this.onMouseDownLng = 0;
+        this.lat = 0;
+        this.latVector = 0;
+        this.onMouseDownLat = 0;
+        this.phi = 0;
+        this.theta = 0;
+        this.fov = 70;
+        this.fovVector = 70;
+        this.init();
+    }
+    init() {
+        this.onTouchStartHandler = this.onTouchStart.bind(this);
+        this.onClickHandler = this.onClick.bind(this);
+        this.onMouseDownHandler = this.onMouseDown.bind(this);
+        this.onMouseWheelHandler = this.onMouseWheel.bind(this);
+        this.canvas.addEventListener('touchstart', this.onTouchStartHandler);
+        this.canvas.addEventListener('click', this.onClickHandler);
+        this.canvas.addEventListener('mousedown', this.onMouseDownHandler);
+        this.canvas.addEventListener('mousewheel', this.onMouseWheelHandler);
+        this.camera.lookAt(this.lat, this.lng);
+    }
+    setTween(tween) {
+        this.tween = tween;
+    }
+    position() {
+        return { lat: this.lat, lng: normLng(this.lng), fov: this.fov };
+    }
+    tick(delta) {
+        if (this.isInteracting === false) ;
+        this.lat = Math.max(-90, Math.min(89.9999999999, this.lat));
+        if (this.tween) {
+            if (this.fovVector != this.fov) {
+                let diff = (this.fov - this.fovVector) / 10;
+                if (Math.abs(this.fovVector / diff) > 500000) {
+                    this.fov = this.fovVector;
+                }
+                else {
+                    this.fov = this.fov - diff;
+                }
+                this.onFovChanged();
+            }
+            let posChanged = false;
+            if (this.latVector != this.lat) {
+                let diff = (this.lat - this.latVector) / 10;
+                if (Math.abs(this.fov / diff) > 100000) {
+                    this.lat = this.latVector;
+                }
+                else {
+                    this.lat = this.lat - diff;
+                }
+                posChanged = true;
+            }
+            if (this.lngVector != this.lng) {
+                let diff = (this.lng - this.lngVector) / 10;
+                if (Math.abs(this.fov / diff) > 100000) {
+                    this.lng = this.lngVector;
+                }
+                else {
+                    this.lng = this.lng - diff;
+                }
+                posChanged = true;
+            }
+            if (posChanged)
+                this.onPosChanged();
+        }
+    }
+    // Touch events
+    onTouchStart(e) {
+        var touches = e.touches;
+        if (touches.length == 1) {
+            this.touchType = TouchType.Touch;
+        }
+        else if (touches.length == 2) {
+            this.touchType = TouchType.Zoom;
+        }
+        if (this.touchType == TouchType.Touch && e.type == 'touchstart') {
+            var touch = touches[0];
+            this.isInteracting = true;
+            this.onMouseDownMouseX = touch.pageX;
+            this.onMouseDownMouseY = touch.pageY;
+            this.onMouseDownLng = this.lng;
+            this.onMouseDownLat = this.lat;
+        }
+        if (this.touchType == TouchType.Zoom) {
+            this.onTouchDist = Math.hypot(touches[0].pageX - touches[1].pageX, touches[0].pageY - touches[1].pageY);
+            this.onTouchFov = this.fov;
+        }
+        this.onTouchMoveHandler = this.onTouchMove.bind(this);
+        this.onTouchUpHandler = this.onTouchUp.bind(this);
+        this.canvas.addEventListener('touchmove', this.onTouchMoveHandler);
+        this.canvas.addEventListener('touchend', this.onTouchUpHandler);
+        this.canvas.addEventListener('touchcancel', this.onTouchUpHandler);
+        e.preventDefault();
+    }
+    onTouchMove(e) {
+        var touches = e.touches;
+        var newTouchType;
+        if (touches.length == 1) {
+            newTouchType = TouchType.Touch;
+        }
+        else if (touches.length == 2) {
+            newTouchType = TouchType.Zoom;
+        }
+        if (this.touchType != newTouchType) {
+            return null;
+        }
+        if (this.touchType == TouchType.Touch && e.type == 'touchmove') {
+            var touch = touches[0];
+            this.lng = (this.onMouseDownMouseX - touch.pageX) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLng;
+            this.lat = (touch.pageY - this.onMouseDownMouseY) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLat;
+            this.latVector = this.lat;
+            this.lngVector = this.lng;
+            this.onPosChanged();
+        }
+        if (this.touchType == TouchType.Zoom && e.type == 'touchmove') {
+            var dist = Math.hypot(touches[0].pageX - touches[1].pageX, touches[0].pageY - touches[1].pageY);
+            var diff = this.onTouchDist - dist;
+            this.fov = MathUtils.clamp(this.onTouchFov + diff * this.onTouchFov / 500, this.fovMin, this.fovMax);
+            this.fovVector = this.fov;
+            this.onFovChanged();
+        }
+    }
+    onTouchUp(e) {
+        this.isInteracting = false;
+        this.canvas.removeEventListener('touchmove', this.onTouchMoveHandler);
+        this.canvas.removeEventListener('touchend', this.onTouchUpHandler);
+        this.canvas.removeEventListener('touchcancel', this.onTouchMoveHandler);
+        this.touchType = null;
+        if (e.changedTouches.length == 1) {
+            const touch = e.changedTouches[0];
+            if (touch.clientX == this.onMouseDownMouseX && touch.clientY == this.onMouseDownMouseY) {
+                this.onTap(e);
+            }
+        }
+    }
+    onTap(e) {
+        console.log('onTap');
+    }
+    // mouse events
+    onMouseDown(e) {
+        this.isInteracting = true;
+        this.onMouseDownMouseX = e.clientX;
+        this.onMouseDownMouseY = e.clientY;
+        this.onMouseDownLng = this.lng;
+        this.onMouseDownLat = this.lat;
+        this.onMouseMoveHandler = this.onMouseMove.bind(this);
+        this.onMouseUpHandler = this.onMouseUp.bind(this);
+        this.canvas.addEventListener('mousemove', this.onMouseMoveHandler);
+        this.canvas.addEventListener('mouseup', this.onMouseUpHandler);
+        this.canvas.addEventListener('mouseleave', this.onMouseUpHandler);
+    }
+    onMouseMove(e) {
+        if (this.tween) {
+            this.lngVector = (this.onMouseDownMouseX - e.clientX) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLng;
+            this.latVector = (e.clientY - this.onMouseDownMouseY) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLat;
+        }
+        else {
+            this.lng = (this.onMouseDownMouseX - e.clientX) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLng;
+            this.lat = (e.clientY - this.onMouseDownMouseY) * this.camera.get().fov * controls.moveFactor / this.canvas.clientWidth + this.onMouseDownLat;
+            this.onPosChanged();
+        }
+    }
+    onMouseUp(e) {
+        this.isInteracting = false;
+        this.canvas.removeEventListener('mousemove', this.onMouseMoveHandler);
+        this.canvas.removeEventListener('mouseup', this.onMouseUpHandler);
+        this.canvas.removeEventListener('mouseleave', this.onMouseUpHandler);
+    }
+    onMouseWheel(e) {
+        if (this.tween) {
+            this.fovVector = MathUtils.clamp(this.fovVector + e.deltaY * this.fovVector / 1000, this.fovMin, this.fovMax);
+        }
+        else {
+            this.fov = MathUtils.clamp(this.fov + e.deltaY * this.fov / 1000, this.fovMin, this.fovMax);
+            this.onFovChanged();
+        }
+    }
+    onClick(e) {
+        if (e.clientX == this.onMouseDownMouseX && e.clientY == this.onMouseDownMouseY) {
+            this.canvas.dispatchEvent(new CustomEvent('panoClick', { detail: e }));
+        }
+    }
+    onFovChanged() {
+        this.camera.setFov(this.fov);
+        this.canvas.dispatchEvent(new CustomEvent('fovChanged', { detail: { fov: this.fov } }));
+    }
+    onPosChanged() {
+        this.camera.lookAt(this.lat, this.lng);
+        this.canvas.dispatchEvent(new CustomEvent('cameraMove', { detail: { lat: this.lat, lng: this.lng } }));
+    }
+}
+
+class Resizer {
+    constructor(container, camera, renderer) {
+        this.container = container;
+        this.camera = camera;
+        this.renderer = renderer;
+        this.setSize();
+        window.addEventListener('resize', () => this.setSize());
+    }
+    setSize() {
+        const aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.setAspect(aspect);
+        this.renderer.setSize();
+    }
+}
+
+const { near, far, fov } = camera;
+class Camera {
+    constructor(container) {
+        const aspect = container.clientWidth / container.clientHeight;
+        this.instance = new PerspectiveCamera(fov, aspect, near, far);
+        this.instance.position.set(0, 0, 0);
+        this.tick = (delta) => {
+            console.log('camera tick');
+        };
+    }
+    setAspect(aspect) {
+        this.instance.aspect = aspect;
+        this.instance.updateProjectionMatrix();
+    }
+    get() {
+        return this.instance;
+    }
+    lookAt(lat, lng) {
+        lat = Math.max(-90, Math.min(89.9999999999, lat));
+        var phi = MathUtils.degToRad(90 - lat);
+        var theta = MathUtils.degToRad(lng);
+        const x = 500 * Math.sin(phi) * Math.cos(theta);
+        const y = 500 * Math.cos(phi);
+        const z = 500 * Math.sin(phi) * Math.sin(theta);
+        this.instance.lookAt(x, y, z);
+    }
+    setFov(fov) {
+        this.instance.fov = fov;
+        this.instance.updateProjectionMatrix();
+    }
+}
+
+class Scene {
+    constructor() {
+        this.instance = new Scene$1();
+    }
+    add(object) {
+        this.instance.add(object);
+    }
+    get() {
+        return this.instance;
+    }
+}
+
+class Sphere {
+    constructor(source, controls) {
+        const geometry = new SphereGeometry(pano.tileBase, 64, 64);
+        geometry.scale(-1, 1, 1);
+        const texture = new TextureLoader$1().load(source, (texture) => {
+            const pd = texture.source.data.width / 360;
+            const fovMin = controls.canvas.clientWidth / pd;
+            controls.fovMin = fovMin / 2;
+        });
+        const material = new MeshBasicMaterial({ map: texture });
+        this.instance = new Mesh(geometry, material);
+    }
+    get() {
+        return this.instance;
+    }
+}
 
 class TextureLoader extends Loader {
 
@@ -29179,7 +29694,7 @@ class TextureLoader extends Loader {
 
 function createTile(name, side, level, data, source) {
     const url = source()(side, level, data.x, data.y);
-    const tileBaseSize = tileBase + maxLevels - level;
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level;
     const half = tileBaseSize / 2;
     const offsetX = data.width / 2 - half + data.offsetX;
     const offsetY = half - data.height / 2 - data.offsetY;
@@ -29195,7 +29710,7 @@ function createTile(name, side, level, data, source) {
 }
 
 const sidePosition = (side, level) => {
-    const tileBaseSize = tileBase + maxLevels - level;
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level;
     const half = tileBaseSize / 2;
     if(side == 'f') return [ 0, 0, half ]
     if(side == 'b') return [ 0, 0, -half ]
@@ -29261,54 +29776,8 @@ function deleteSide(group) {
     }
 }
 
-const minFor = (value, count, extend) => {
-    value = Math.round(value * count) - extend;
-    if (value < 0)
-        value = 0;
-    return value;
-};
-const maxFor = (value, count, extend) => {
-    value = Math.round(value * count) + extend;
-    if (value > (count - 1))
-        value = count - 1;
-    return value;
-};
-const tilesFor = (level, levelData, bounds) => {
-    var _a, _b;
-    if (!((_a = bounds === null || bounds === void 0 ? void 0 : bounds.x) === null || _a === void 0 ? void 0 : _a.min) && !((_b = bounds === null || bounds === void 0 ? void 0 : bounds.x) === null || _b === void 0 ? void 0 : _b.max))
-        return [];
-    const { tileSize, size } = levelData;
-    const tileBaseSize = tileBase + maxLevels - level;
-    const tileSizePart = tileSize / (size / tileBaseSize);
-    const tiles = [];
-    const max = Math.ceil(tileBaseSize / tileSizePart);
-    let xMin = minFor(bounds.x.min, max, 2);
-    let xMax = maxFor(bounds.x.max, max, 2);
-    let yMin = minFor(bounds.y.min, max, 2);
-    let yMax = maxFor(bounds.y.max, max, 2);
-    for (var x = xMin; x <= xMax; x++) {
-        for (var y = yMin; y <= yMax; y++) {
-            if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-                const offsetX = x * tileSizePart;
-                const offsetY = y * tileSizePart;
-                const width = ((x + 1) * tileSizePart) > tileBaseSize ? (tileBaseSize - x * tileSizePart) : tileSizePart;
-                const height = ((y + 1) * tileSizePart) > tileBaseSize ? (tileBaseSize - y * tileSizePart) : tileSizePart;
-                tiles.push({ x, y, offsetX, offsetY, width, height });
-            }
-        }
-    }
-    return tiles;
-};
-const normLng = (lng) => {
-    while (lng > 360)
-        lng -= 360;
-    while (lng < 0)
-        lng += 360;
-    return lng;
-};
-
 function createCube() {
-    const boxSize = tileBase + maxLevels + 2;
+    const boxSize = pano.tileBase + pano.maxLevels + 2;
     const geometry = new BoxGeometry(boxSize, boxSize, boxSize);
     const material = new MeshBasicMaterial({ color: 0x00ff00 });
     material.side = BackSide;
@@ -29317,14 +29786,14 @@ function createCube() {
     return new Mesh(geometry, material);
 }
 
-class MultiResPano {
-    constructor(levels, source, controls, camera) {
+class Multires {
+    constructor(levels, source, controls) {
         this.pixelsMin = 0.5;
         this.pixelsMax = 5;
         this.levels = levels;
         this.source = source;
         this.controls = controls;
-        this.camera = camera;
+        this.camera = controls.camera.get();
         this.visible = {
             pixels: [],
             maxLevel: 0,
@@ -29332,12 +29801,17 @@ class MultiResPano {
             meshes: []
         };
         this.cube = createCube();
+        this.controls.canvas.addEventListener('cameraMove', this.onCameraMove.bind(this));
+        this.controls.canvas.addEventListener('fovChanged', this.onFovChanged.bind(this));
+    }
+    get() {
+        return this.instance;
     }
     createPano() {
-        this.pano = new Group();
-        this.pano.renderOrder = 2;
-        this.pano.name = 'multires-pano';
-        return this.pano;
+        this.instance = new Group();
+        this.instance.renderOrder = 2;
+        this.instance.name = 'multires-pano';
+        return this.instance;
     }
     pixelsBySize(size, fov) {
         const height = this.controls.canvas.parentElement.clientHeight;
@@ -29352,7 +29826,7 @@ class MultiResPano {
         return (height * 100) / (size * 0.9 * max);
     }
     pointSideXY(point) {
-        const size = (maxLevels + tileBase + 2);
+        const size = (pano.maxLevels + pano.tileBase + 2);
         const mul = 1000000;
         const hs = size / 2;
         const hsMul = (hs * mul);
@@ -29441,6 +29915,21 @@ class MultiResPano {
             }
         }
     }
+    onCameraMove(e) {
+        this.updatePosition();
+    }
+    onFovChanged(e) {
+        this.updatePosition();
+    }
+    updatePosition() {
+        const pos = this.controls.position();
+        this.onPosFovChanged(pos);
+        this.addUpdateVisible();
+        if (this.camera.fov != pos.fov) {
+            this.camera.fov = pos.fov;
+            this.camera.updateProjectionMatrix();
+        }
+    }
     onPosFovChanged(pos) {
         this.calcVisibleData(pos);
     }
@@ -29473,7 +29962,7 @@ class MultiResPano {
         }
         this.visible.points = this.screenPoints(1.1, 5);
         this.visible.sides = this.sidesBounds();
-        this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 1.25);
+        this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 2);
         this.sidesVisibleTiles();
     }
     addUpdateVisible() {
@@ -29481,378 +29970,167 @@ class MultiResPano {
             for (var level in this.visible.sides[side].tiles) {
                 const tiles = this.visible.sides[side].tiles[level];
                 const name = level + '-' + side;
-                const group = this.pano.getObjectByName(name);
+                const group = this.instance.getObjectByName(name);
                 if (group) {
                     updateSide(group, side, level, tiles, this.source, this.visible.meshes);
                 }
                 else {
-                    this.pano.add(createSide(side, level, tiles, this.source));
+                    this.instance.add(createSide(side, level, tiles, this.source));
                 }
             }
         }
-        const groups = this.pano.children.map(item => item.name);
+        const groups = this.instance.children.map(item => item.name);
         for (var i = groups.length - 1; i >= 0; i--) {
             const name = groups[i];
             const [level] = name.split('-');
             if (!this.visible.meshes.includes(name)
                 && !this.levels[level].fallback) {
-                const group = this.pano.getObjectByName(name);
+                const group = this.instance.getObjectByName(name);
                 if (group) {
                     deleteSide(group);
-                    this.pano.remove(group);
+                    this.instance.remove(group);
                 }
             }
         }
-        return this.pano;
+        return this.instance;
     }
 }
 
-function createScene() {
-  const scene = new Scene();
-
-  return scene;
+class Pano {
+    constructor() { }
+    sphere(source, controls) {
+        this.instance = new Sphere(source, controls);
+        return this;
+    }
+    multires(levels, source, controls) {
+        this.instance = new Multires(levels, source, controls);
+        this.instance.createPano();
+        this.instance.updatePosition();
+        return this;
+    }
+    get() {
+        return this.instance.get();
+    }
 }
 
-let onTouchDist, onTouchFov, touchType,
-onPointerDownMouseX = 0, onPointerDownMouseY = 0,
-lng = 90, lngVector = 90, onPointerDownLng = 0,
-lat = 0, latVector = 0, onPointerDownLat = 0,
-phi = 0, theta = 0,
-fov = 70, fovVector = 70;
-
-
-class PanoControls {
-
-    constructor(camera, canvas, shouldTween) {
-        this.camera = camera;
-        this.canvas = canvas;
-        this.shouldTween = !!shouldTween;
-        this.fovMax = 160;
-        this.fovMin = 0.0055;
-        this.init();
-    }
-
-    getPosition(){
-        return { lat, lng: normLng(lng), fov }
-    }
-
-    lookAt(lat, lng){
-        lat = Math.max( - 90, Math.min( 89.9999999999, lat ) );
-        phi = MathUtils.degToRad( 90 - lat );
-        theta = MathUtils.degToRad( lng );
-  
-        const x = 500 * Math.sin( phi ) * Math.cos( theta );
-        const y = 500 * Math.cos( phi );
-        const z = 500 * Math.sin( phi ) * Math.sin( theta );
-        this.camera.lookAt(x, y, z);
-    }
-
-    tick(delta) {
-        lat = Math.max( - 90, Math.min( 89.9999999999, lat ) );
-        if(this.shouldTween){
-            if(fovVector != fov){
-                let diff = (fov - fovVector) / 10;
-                if(Math.abs(fovVector / diff) > 500000){
-                    fov = fovVector;
-                }else {
-                    fov = fov - diff;
-                }
-                this.canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}));
-            }
-            let posChanged = false;
-            if(latVector != lat){
-                let diff = (lat - latVector) / 10;
-                if(Math.abs(fov / diff) > 100000){
-                    lat = latVector;
-                }else {
-                    lat = lat - diff;
-                }
-                posChanged = true;
-            }
-            if(lngVector != lng){
-                let diff = (lng - lngVector) / 10;
-                if(Math.abs(fov / diff) > 100000){
-                    lng = lngVector;
-                }else {
-                    lng = lng - diff;
-                }
-                posChanged = true;
-            }
-            if(posChanged){
-                this.lookAt(lat, lng);
-                this.canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng, fov }}));
-            }
-        }
-    }
-
-    init(){
-
-        // touch events
-
-        const onTouchStart = e => {
-
-            console.log('onTouchStart');
-
-            var touches = e.touches;
-            if(touches.length == 1){
-                touchType = 'touch';
-            }else if(touches.length == 2){
-                touchType = 'zoom';
-            }
-
-            if(touchType == 'touch' && e.type == 'touchstart'){
-                var touch = touches[0];
-                onPointerDownMouseX = touch.pageX;
-                onPointerDownMouseY = touch.pageY;
-                onPointerDownLng = lng;
-                onPointerDownLat = lat;
-            }
-
-            if(touchType == 'zoom'){
-                onTouchDist = Math.hypot(
-                    touches[0].pageX - touches[1].pageX,
-                    touches[0].pageY - touches[1].pageY
-                );
-                onTouchFov = fov;
-            }
-
-            document.addEventListener( 'touchmove', onTouchMove );
-            document.addEventListener( 'touchend', onTouchUp );
-            document.addEventListener( 'touchcancel', onTouchUp );
-            e.preventDefault();
-        };
-
-        this.canvas.addEventListener('touchstart', onTouchStart);
-
-        const onTouchMove = e => ((e, camera, canvas) => {
-
-            var touches = e.touches;
-            var newTouchType;
-            if(touches.length == 1){
-                newTouchType = 'touch';
-            }else if(touches.length == 2){
-                newTouchType = 'zoom';
-            }
-            console.log(touchType, newTouchType);
-            if(touchType != newTouchType){
-                return null
-            }
-
-            if(touchType == 'touch' && e.type == 'touchmove'){
-                var touch = touches[0];
-                lng = ( onPointerDownMouseX - touch.pageX ) * camera.fov / 650 + onPointerDownLng;
-                lat = ( touch.pageY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-                latVector = lat;
-                lngVector = lng;
-                this.lookAt(lat, lng);
-                canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}));
-            }
-
-            if(touchType == 'zoom' && e.type == 'touchmove'){
-                var dist = Math.hypot(
-                    touches[0].pageX - touches[1].pageX,
-                    touches[0].pageY - touches[1].pageY
-                );
-                var diff = onTouchDist - dist;
-                fov = MathUtils.clamp( onTouchFov + diff * onTouchFov / 500, this.fovMin, this.fovMax );
-                fovVector = fov;
-                canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}));
-            }
-
-        })(e, this.camera, this.canvas);
-
-        const onTouchUp = (e) => {
-            if ( e.isPrimary === false ) return;
-            document.removeEventListener( 'pointermove', onTouchMove );
-            document.removeEventListener( 'pointerup', onTouchUp );
-            touchType = null;
-        };
-
-        // mouse events
-
-        this.canvas.addEventListener( 'click', e => {
-            this.canvas.dispatchEvent(new CustomEvent('onPanoClick', {detail: e}));
-        });
-
-        const onPointerDown = e => {
-            if ( e.isPrimary === false ) return;    
-            onPointerDownMouseX = e.clientX;
-            onPointerDownMouseY = e.clientY;
-
-            onPointerDownLng = lng;
-            onPointerDownLat = lat;
-
-            //console.log('onPointerDown', e)
-
-            document.addEventListener( 'pointermove', onPointerMove );
-            document.addEventListener( 'pointerup', onPointerUp );
-        };
-
-        this.canvas.addEventListener( 'pointerdown', onPointerDown );
-
-        const onPointerMove = e => ((e, camera, canvas) => {
-            if ( e.isPrimary === false ) return;
-            if(e.pointerType == 'mouse'){
-                if(this.shouldTween){
-                    lngVector = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
-                    latVector = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-                }else {
-                    lng = ( onPointerDownMouseX - e.clientX ) * camera.fov / 650 + onPointerDownLng;
-                    lat = ( e.clientY - onPointerDownMouseY ) * camera.fov / 650 + onPointerDownLat;
-                    this.lookAt(lat, lng);
-                    canvas.dispatchEvent(new CustomEvent('onCameraMove', {detail: { lat, lng }}));
-                }
-            }
-        })(e, this.camera, this.canvas);
-        
-        const onPointerUp = (e) => {
-            if ( e.isPrimary === false ) return;
-            document.removeEventListener( 'pointermove', onPointerMove );
-            document.removeEventListener( 'pointerup', onPointerUp );
-        };
-        
-        const onDocumentMouseWheel = (e, camera, canvas) => {
-            if(this.shouldTween){
-                fovVector = MathUtils.clamp(fovVector + e.deltaY * fovVector / 1000, this.fovMin, this.fovMax );
-            }else {
-                fov = MathUtils.clamp(fov + e.deltaY * fov / 1000, this.fovMin, this.fovMax );
-                canvas.dispatchEvent(new CustomEvent('onFovChanged', {detail: { fov }}));
-            }
-        };
-
-        document.addEventListener( 'wheel', e => onDocumentMouseWheel(e, this.camera, this.canvas) );
-
-        this.lookAt(lat, lng);
-    }
-
-}
-
-function createControls(camera, canvas, shouldTween) {
-    const controls = new PanoControls(camera, canvas, shouldTween);
-    return controls;
-}
-
-function createRenderer() {
-  const renderer = new WebGLRenderer({ antialias: true });
-
-  return renderer
-}
-
-const setSize = (container, camera, renderer) => {
-  camera.aspect = container.clientWidth / container.clientHeight;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-};
-
-let customOnResize;
-
-class Resizer {
-  constructor(container, camera, renderer) {
-    setSize(container, camera, renderer);
-
-    window.addEventListener('resize', () => {
-      setSize(container, camera, renderer);
-      this.onResize();
-    });
-  }
-
-  onResize(){
-    if(typeof customOnResize == 'function') customOnResize();
-  }
-
-  setOnResize(fnc){
-    customOnResize = fnc;
-  }
-}
-
-const clock = new Clock();
-
-
-class Loop {
-
-    constructor(camera, scene, renderer) {
-        this.camera = camera;
-        this.scene = scene;
-        this.renderer = renderer;
-        this.updatable = [];
-    }
-
-    start() {
-        this.renderer.setAnimationLoop((t) => {
-            this.tick();
-            this.renderer.render(this.scene, this.camera);
-        });
-    }
-
-    stop() {
-        this.renderer.setAnimationLoop(null);
-    }
-
-    tick() {
-        const delta = clock.getDelta();
-        for (const object of this.updatable) {
-            object.tick(delta);
-        }
-    }
-
-}
-
-class AvanselViewer {
+//import { createPreview } from './components/pano/preview';
+//import { MultiResPano } from './components/pano/MultiResPano';
+//import { createHotspot, createHotspotXYZ } from './components/hotspot/hotspot';
+//import { PanoControls } from './systems/PanoControls.js';
+class Avansel {
     constructor(container, levels, source) {
-        this.camera = createCamera(container);
-        this.scene = createScene();
-        this.renderer = createRenderer();
-        this.loop = new Loop(this.camera, this.scene, this.renderer);
-        container.append(this.renderer.domElement);
-        this.controls = createControls(this.camera, this.renderer.domElement, true);
-        {
-            this.pano = new MultiResPano(levels, source, this.controls, this.camera);
-            this.scene.add(this.pano.createPano());
-            const pos = this.controls.getPosition();
-            this.controls.lookAt(pos.lat, pos.lng);
-            this.updatePosition();
-        }
+        this.container = container;
+        this.renderer = new Renderer(container);
+        this.canvas = this.renderer.get().domElement;
+        this.camera = new Camera(container);
         this.resizer = new Resizer(container, this.camera, this.renderer);
+        this.scene = new Scene();
+        this.loop = new Loop(this.camera, this.scene, this.renderer);
+        this.controls = new Controls(this.camera, this.canvas);
         this.loop.updatable.push(this.controls);
-        this.renderer.domElement.addEventListener('onPanoClick', (e) => this.onPanoClick(e));
-        this.renderer.domElement.addEventListener('onCameraMove', (e) => this.onCameraMove(e));
-        this.renderer.domElement.addEventListener('onFovChanged', (e) => this.onFovChanged(e));
-        // TODO: udpate this
-        this.resizer.setOnResize(() => {
-            //
-        });
         this.render();
     }
+    sphere(source) {
+        this.pano = new Pano().sphere(source, this.controls);
+        this.scene.add(this.pano.get());
+        return this;
+    }
+    multires(levels, source) {
+        this.pano = new Pano().multires(levels, source, this.controls);
+        this.scene.add(this.pano.get());
+        return this;
+    }
+    withTween(tween) {
+        this.controls.setTween(tween);
+        return this;
+    }
     render() {
-        this.renderer.render(this.scene, this.camera);
+        this.renderer.get().render(this.scene.get(), this.camera.get());
     }
     start() {
         this.loop.start();
+        return this;
     }
     stop() {
         this.loop.stop();
     }
-    onPanoClick(e) {
-        //console.log('click', e.detail);
-    }
-    onCameraMove(e) {
-        this.updatePosition();
-    }
-    onFovChanged(e) {
-        this.updatePosition();
-    }
-    updatePosition() {
-        const pos = this.controls.getPosition();
-        this.pano.onPosFovChanged(pos);
-        this.pano.addUpdateVisible();
-        if (this.camera.fov != pos.fov) {
-            this.camera.fov = pos.fov;
-            this.camera.updateProjectionMatrix();
-        }
-    }
 }
 
-export { AvanselViewer };
-//# sourceMappingURL=avanselviewer.js.map
+new Avansel(document.getElementById('pano1'))
+	.sphere('/files/examples/pano-8000.jpg')
+	.start();
+
+new Avansel(document.getElementById('pano2'))
+	.sphere('/files/examples/pano.jpg')
+	.withTween(false)
+	.start();
+
+
+new Avansel(document.getElementById('pano3'))
+	.multires([
+		{ tileSize: 374, size: 374, fallback: true },
+		{ tileSize: 512, size: 749 },
+		{ tileSize: 512, size: 1498 },
+		{ tileSize: 512, size: 2996 },
+		{ tileSize: 512, size: 5992 },
+	], () => (s, l, x, y) => {
+		l = parseInt(l) + 1;
+		return `/files/examples/multires-1/${l}/${s}${y}_${x}.jpg`
+	})
+	.start();
+
+	/*
+	// Multiresolution panorama
+	/*
+	const avansel = new AvanselViewer(container, [
+			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
+			{ tileSize: 512, size: 512 * 2 ** 1 },
+			{ tileSize: 512, size: 512 * 2 ** 2 },
+			{ tileSize: 512, size: 512 * 2 ** 3 },
+			{ tileSize: 512, size: 512 * 2 ** 4 },
+			{ tileSize: 512, size: 512 * 2 ** 5 },
+			{ tileSize: 512, size: 512 * 2 ** 6 },
+			{ tileSize: 512, size: 512 * 2 ** 7 },
+			{ tileSize: 512, size: 512 * 2 ** 8 },
+			{ tileSize: 512, size: 512 * 2 ** 9 },
+			{ tileSize: 512, size: 512 * 2 ** 10 },
+			{ tileSize: 512, size: 512 * 2 ** 11 },
+			{ tileSize: 512, size: 512 * 2 ** 12 },
+			{ tileSize: 512, size: 512 * 2 ** 13 },
+			{ tileSize: 512, size: 512 * 2 ** 14 },
+			{ tileSize: 512, size: 512 * 2 ** 15 }
+		],
+		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
+	)
+	*/
+	/*
+	const avansel = new AvanselViewer(container, [
+		{ tileSize: 512, size: 640, fallback: true },
+		{ tileSize: 512, size: 1280 },
+		{ tileSize: 512, size: 2560 },
+		{ tileSize: 512, size: 4864 },
+	],
+	() => (s, l, x, y) => {
+		l = parseInt(l) + 1
+		x = ((x + 1) + '').padStart(2, '0')
+		y = ((y + 1) + '').padStart(2, '0')
+		return `/files/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
+	})
+	*/
+/*
+	const avansel = new AvanselViewer(container, [
+		{ tileSize: 374, size: 374, fallback: true },
+		{ tileSize: 512, size: 749 },
+		{ tileSize: 512, size: 1498 },
+		{ tileSize: 512, size: 2996 },
+		{ tileSize: 512, size: 5992 },
+	],
+	() => (s, l, x, y) => {
+		l = parseInt(l) + 1
+		return `/files/examples/multires-2/${l}/${s}${y}_${x}.jpg`
+	})
+
+main()
+
+*/
+//# sourceMappingURL=main.js.map

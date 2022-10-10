@@ -1,10 +1,10 @@
 
 import { Group, MathUtils } from 'three';
 import { createTile } from './tile.js';
-import { tileBase, maxLevels } from '../../config.js'
+import { pano } from '../../config.json'
 
 const sidePosition = (side, level) => {
-    const tileBaseSize = tileBase + maxLevels - level
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level
     const half = tileBaseSize / 2
     if(side == 'f') return [ 0, 0, half ]
     if(side == 'b') return [ 0, 0, -half ]

@@ -1,5 +1,6 @@
 import { MathUtils } from 'three';
-import { tileBase, maxLevels } from '../config.js';
+import { pano } from '../config.json'
+
 
 interface AxisBounds {
     min: number,
@@ -59,7 +60,7 @@ const maxFor = (value: number, count: number, extend: number) => {
 export const tilesFor = (level: number, levelData: Level, bounds: SideBounds):Array<TileInfo> => {
     if(!bounds?.x?.min && !bounds?.x?.max) return []
     const { tileSize, size } = levelData
-    const tileBaseSize = tileBase + maxLevels - level
+    const tileBaseSize = pano.tileBase + pano.maxLevels - level
     const tileSizePart = tileSize / (size / tileBaseSize)
     const tiles = [];
     const max = Math.ceil(tileBaseSize / tileSizePart)
