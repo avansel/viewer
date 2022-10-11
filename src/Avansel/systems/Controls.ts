@@ -272,6 +272,8 @@ export default class Controls{
     }
 
     onMouseWheel(e: WheelEvent){
+        e.preventDefault()
+        e.stopPropagation()
         if(this.tween){
             this.fovVector = MathUtils.clamp(this.fovVector + e.deltaY * this.fovVector / 1000, this.fovMin, this.fovMax )
         }else{

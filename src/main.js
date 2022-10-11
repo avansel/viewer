@@ -43,33 +43,3 @@ new Avansel(document.getElementById('pano4'))
 		{ tileSize: 512, size: 512 * 2 ** 15 }
 	], () => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`)
 	.start()
-	/*
-	const avansel = new AvanselViewer(container, [
-		{ tileSize: 512, size: 640, fallback: true },
-		{ tileSize: 512, size: 1280 },
-		{ tileSize: 512, size: 2560 },
-		{ tileSize: 512, size: 4864 },
-	],
-	() => (s, l, x, y) => {
-		l = parseInt(l) + 1
-		x = ((x + 1) + '').padStart(2, '0')
-		y = ((y + 1) + '').padStart(2, '0')
-		return `/files/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
-	})
-	*/
-/*
-	const avansel = new AvanselViewer(container, [
-		{ tileSize: 374, size: 374, fallback: true },
-		{ tileSize: 512, size: 749 },
-		{ tileSize: 512, size: 1498 },
-		{ tileSize: 512, size: 2996 },
-		{ tileSize: 512, size: 5992 },
-	],
-	() => (s, l, x, y) => {
-		l = parseInt(l) + 1
-		return `/files/examples/multires-2/${l}/${s}${y}_${x}.jpg`
-	})
-
-main()
-
-*/
