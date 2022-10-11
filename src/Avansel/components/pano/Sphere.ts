@@ -13,7 +13,7 @@ export default class Sphere{
     const texture = new TextureLoader().load( source, (texture: Texture) => {
       const pd = texture.source.data.width / 360
       const fovMin = controls.canvas.clientWidth / pd
-      controls.fovMin = fovMin / 2
+      controls.fovMin = fovMin / pano.pixelZoom
     } )
     const material = new MeshBasicMaterial( { map: texture } )
     this.instance =  new Mesh( geometry, material )

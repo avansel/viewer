@@ -1,6 +1,6 @@
 
 import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, BackSide, ImageLoader } from 'three';
-import { pano } from '../../config.json'
+import { pano } from '../../../config.json'
 
 enum ImageType { Sphere, Cylinder, Cubestrip }
 enum StripType { Type1x6, Type2x3, Type3x2, Type6x1 }

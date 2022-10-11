@@ -1,7 +1,7 @@
 import { Group, Mesh, Vector2, Raycaster, PerspectiveCamera, Vector3 } from 'three'
-import { createSide, updateSide, deleteSide } from './side.js'
+import { createSide, updateSide, deleteSide } from './common/Side.js'
 import { tilesFor } from '../utils'
-import { createCube } from './cube'
+import { createCube } from './common/cube'
 import { pano } from '../../config.json'
 import Controls from '../../systems/Controls.js'
 
@@ -206,7 +206,7 @@ class Multires {
     }
     this.visible.points = this.screenPoints(1.1, 5)
     this.visible.sides = this.sidesBounds()
-    this.controls.fovMin = this.minFov(this.levels[lastLevel].size, 2)
+    this.controls.fovMin = this.minFov(this.levels[lastLevel].size, pano.pixelZoom)
     this.sidesVisibleTiles()
   }
 
@@ -215,11 +215,11 @@ class Multires {
       for(var level in this.visible.sides[side].tiles){
         const tiles = this.visible.sides[side].tiles[level]
         const name = level + '-' + side
-        const group = this.instance.getObjectByName(name)
+        const group = this.instance.getObjectByName(name) as Group
         if(group){
-          updateSide(group, side, level, tiles, this.source, this.visible.meshes)
+          updateSide(group, side, parseInt(level), tiles, this.source, this.visible.meshes)
         }else{
-          this.instance.add(createSide(side, level, tiles, this.source))
+          this.instance.add(createSide(side, parseInt(level), tiles, this.source))
         }
       }
     }

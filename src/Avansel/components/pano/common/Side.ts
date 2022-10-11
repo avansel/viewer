@@ -1,9 +1,10 @@
 
-import { Group, MathUtils } from 'three';
-import { createTile } from './tile.js';
-import { pano } from '../../config.json'
+import { Group, Material, MathUtils, Mesh, MeshBasicMaterial, Texture } from 'three';
+import { createTile } from './Tile';
+import { pano } from '../../../config.json'
+import { AbortFunction } from '../../../Types';
 
-const sidePosition = (side, level) => {
+const sidePosition = (side: string, level: number) => {
     const tileBaseSize = pano.tileBase + pano.maxLevels - level
     const half = tileBaseSize / 2
     if(side == 'f') return [ 0, 0, half ]
@@ -15,7 +16,7 @@ const sidePosition = (side, level) => {
     return [0, 0, 0]
 }
 
-const sideRotation = side => {
+const sideRotation = (side: string) => {
     if(side =='f') return [0, MathUtils.degToRad(180), 0]
     if(side =='b') return [0, MathUtils.degToRad(0), 0]
     if(side =='l') return [0, MathUtils.degToRad(-90), 0]
@@ -25,7 +26,7 @@ const sideRotation = side => {
     return [0, 0, 0]
 }
 
-const sideByLatLng = (lat, lng) => {
+const sideByLatLng = (lat: number, lng: number) => {
     if(lng > 45 && lng <= 135 && lat >= -45 && lat <= 45) return 'f'
     if(lng > 135 && lng <= 225 && lat >= -45 && lat <= 45) return 'r'
     if(lng > 225 && lng <= 315 && lat >= -45 && lat <= 45) return 'b'
@@ -34,7 +35,7 @@ const sideByLatLng = (lat, lng) => {
     if(lat < -45) return 'd'
 }
 
-function createSide(side, level, tiles, source) {
+function createSide(side: string, level: number, tiles: Array<any>, source: string | Function) {
     const group = new Group()
     const position = sidePosition(side, level)
     const rotation = sideRotation(side)
@@ -50,7 +51,7 @@ function createSide(side, level, tiles, source) {
     return group
 }
 
-function updateSide(group, side, level, tiles, source, meshes) {
+function updateSide(group: Group, side: string, level: number, tiles: Array<any>, source: string | Function, meshes: Array<string>) {
     for(var i = 0; i < tiles.length; i++){
         const data = tiles[i]
         const name = level + '-' + side + '-' + data.x + '-' + data.y
@@ -60,10 +61,12 @@ function updateSide(group, side, level, tiles, source, meshes) {
     }
     for(var i = group.children.length - 1; i >= 0; i--){
         if(!meshes.includes(group.children[i].name)){
-            const tile = group.children[i]
-            tile.material.map.abort()
+            const tile = group.children[i] as Mesh
+            const material = tile.material as MeshBasicMaterial
+            const texture  = material.map as Texture & AbortFunction
+            texture.abort()
             tile.geometry.dispose()
-            tile.material.dispose()
+            material.dispose()
             group.remove( tile );
         }
     }

@@ -1,6 +1,6 @@
 
 import { BoxGeometry, Mesh, MeshBasicMaterial, BackSide } from 'three';
-import { pano } from '../../config.json'
+import { pano } from '../../../config.json'
 
 
 let mesh: Mesh

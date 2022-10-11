@@ -4,3 +4,7 @@ export declare interface CameraPosition {
     lng: number
     fov: number
 }
+
+export type AbortFunction = {
+    abort: Function
+}
