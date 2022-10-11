@@ -1,6 +1,6 @@
 {
-  "name": "avanselviewer",
-  "version": "0.0.10",
+  "name": "avansel",
+  "version": "0.0.11",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
   "keywords": [
     "threejs",
@@ -10,19 +10,18 @@
     "multiresolution",
     "virtual tour"
   ],
-  "main": "./dist/avanselviewer.js",
+  "main": "./build/avansel.js",
   "type": "module",
-  "module": "./dist/avanselviewer.js",
+  "module": "./build/avansel.js",
   "exports": {
-    ".": "./dist/avanselviewer.js"
+    ".": "./build/avansel.js"
   },
-  "homepage": "https://avansel.com",
+  "homepage": "https://avansel.github.io",
   "bugs": {
-    "url": "https://github.com/romangrinev/avanselviewer/issues",
+    "url": "https://github.com/avansel/viewer/issues",
     "email": "roman@grinev.software"
   },
   "scripts": {
-    "watch": "npm run webpack -- --mode development --watch",
     "dev": "rollup -c ./utils/build/rollup.config.js -w",
     "build": "rollup -c ./utils/build/rollup.config.js",
     "start": "node app.js"
@@ -39,6 +38,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^14.1.0",
     "@rollup/plugin-typescript": "^8.5.0",
     "@types/stats.js": "^0.17.0",

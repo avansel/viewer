@@ -1,0 +1,22 @@
+{
+    "pano": {
+        "tileBase": 100,
+        "maxLevels": 16
+    },
+    
+    "camera": {
+        "fov": 70,
+        "near": 0.1,
+        "far": 200
+    },
+
+    "renderer": {
+        "antialias": true
+    },
+
+    "controls": {
+        "fovMin": 0.0055,
+        "fovMax": 130,
+        "moveFactor": 1.5
+    }
+}

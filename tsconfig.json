@@ -2,9 +2,11 @@
     "compilerOptions": {
       "target": "ES6",
       "module": "ESNext",
-      "outDir": "./dist",
+      "outDir": "./build",
       "rootDir": "./src",
       "sourceMap": true,
-      "noImplicitAny": false
+      "noImplicitAny": false,
+      "esModuleInterop": true,
+      "resolveJsonModule": true
     }
   }

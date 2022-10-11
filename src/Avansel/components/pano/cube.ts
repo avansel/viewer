@@ -1,12 +1,12 @@
 
 import { BoxGeometry, Mesh, MeshBasicMaterial, BackSide } from 'three';
-import { tileBase, maxLevels } from '../../config.js'
+import { pano } from '../../config.json'
 
 
 let mesh: Mesh
 
 function createCube(): Mesh {
-    const boxSize = tileBase + maxLevels + 2
+    const boxSize = pano.tileBase + pano.maxLevels + 2
     const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
     const material = new MeshBasicMaterial( {color: 0x00ff00} )
     material.side = BackSide

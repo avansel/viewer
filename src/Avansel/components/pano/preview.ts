@@ -1,6 +1,6 @@
 
 import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, BackSide, ImageLoader } from 'three';
-import { tileBase, maxLevels } from '../../config.js'
+import { pano } from '../../config.json'
 
 enum ImageType { Sphere, Cylinder, Cubestrip }
 enum StripType { Type1x6, Type2x3, Type3x2, Type6x1 }
@@ -105,7 +105,7 @@ const settingsBy = (img: HTMLImageElement): PreviewSettings => {
         if(!settings.type) settings.type = ImageType.Sphere
     }
     if(!settings.type) settings.type = ImageType.Cylinder
-    if(!settings.size) settings.size = tileBase
+    if(!settings.size) settings.size = pano.tileBase
     return settings
 }
 
@@ -140,7 +140,7 @@ async function createPreview(data: PreviewSettings): Promise<Mesh> {
     settings = data
 
     return new Promise<Mesh>((resolve, reject) => {
-        const boxSize = tileBase + maxLevels + 1
+        const boxSize = pano.tileBase + pano.maxLevels + 1
         const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
 
         if(settings.url || settings.type){

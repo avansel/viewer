@@ -1,8 +1,31 @@
-import { AvanselViewer } from '../dist/avanselviewer.js'
+import { Avansel } from '../build/avansel.js'
 
-function main(){
-	const container = document.querySelector('#avansel')
+new Avansel(document.getElementById('pano1'))
+	.sphere('/files/examples/pano-8000.jpg')
+	.start()
 
+new Avansel(document.getElementById('pano2'))
+	.sphere('/files/examples/pano.jpg')
+	.withTween(false)
+	.start()
+
+
+new Avansel(document.getElementById('pano3'))
+	.multires([
+		{ tileSize: 374, size: 374, fallback: true },
+		{ tileSize: 512, size: 749 },
+		{ tileSize: 512, size: 1498 },
+		{ tileSize: 512, size: 2996 },
+		{ tileSize: 512, size: 5992 },
+	], () => (s, l, x, y) => {
+		l = parseInt(l) + 1
+		return `/files/examples/multires-1/${l}/${s}${y}_${x}.jpg`
+	})
+	.start()
+
+	/*
+	// Multiresolution panorama
+	/*
 	const avansel = new AvanselViewer(container, [
 			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
 			{ tileSize: 512, size: 512 * 2 ** 1 },
@@ -23,6 +46,7 @@ function main(){
 		],
 		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
 	)
+	*/
 	/*
 	const avansel = new AvanselViewer(container, [
 		{ tileSize: 512, size: 640, fallback: true },
@@ -34,11 +58,22 @@ function main(){
 		l = parseInt(l) + 1
 		x = ((x + 1) + '').padStart(2, '0')
 		y = ((y + 1) + '').padStart(2, '0')
-		return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
+		return `/files/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
 	})
 	*/
-	avansel.start()
-
-}
+/*
+	const avansel = new AvanselViewer(container, [
+		{ tileSize: 374, size: 374, fallback: true },
+		{ tileSize: 512, size: 749 },
+		{ tileSize: 512, size: 1498 },
+		{ tileSize: 512, size: 2996 },
+		{ tileSize: 512, size: 5992 },
+	],
+	() => (s, l, x, y) => {
+		l = parseInt(l) + 1
+		return `/files/examples/multires-2/${l}/${s}${y}_${x}.jpg`
+	})
 
 main()
+
+*/

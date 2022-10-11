@@ -5,12 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
-      body, html { margin: 0; padding: 0; overflow: hidden; }
-      #avansel{ height: 100vh; width: 100vw; }
+      body, html { margin: 0; padding: 0; }
+      #group{ display: flex; flex-wrap: wrap; }
+      .pano{ width: 500px; height: 400px; background-color: black; }
     </style>
   </head>
   <body>
-    <div id="avansel"></div>
-    <script src="/dist/main.js"></script>
+    <div id="group">
+      <div class="pano" id="pano1"></div>
+      <div class="pano" id="pano2"></div>
+      <div class="pano" id="pano3"></div>
+    </div>
+    <script type="module" src="/build/avanselviewer.js"></script>
+    <script type="text/javascript" src="/build/main.js"></script>
   </body>
 </html>
