@@ -29663,44 +29663,38 @@ class Sphere {
 }
 
 class TextureLoader extends Loader {
-
-	constructor( manager ) {
-		super( manager );
-	}
-
-	load( url, onLoad, onProgress, onError ) {
-		const texture = new Texture();
-		const loader = new ImageLoader( this.manager );
-		loader.setCrossOrigin( this.crossOrigin );
-		loader.setPath( this.path );
-		var image = loader.load( url, function ( image ) {
-			texture.image = image;
-			texture.needsUpdate = true;
-			if ( onLoad !== undefined ) {
-				onLoad( texture );
-			}
-		}, onProgress, onError );
-
+    constructor(manager) {
+        super(manager);
+    }
+    load(url, onLoad, onProgress, onError) {
+        const texture = new Texture();
+        const loader = new ImageLoader(this.manager);
+        loader.setCrossOrigin(this.crossOrigin);
+        loader.setPath(this.path);
+        var image = loader.load(url, function (image) {
+            texture.image = image;
+            texture.needsUpdate = true;
+            if (onLoad !== undefined) {
+                onLoad(texture);
+            }
+        }, onProgress, onError);
         texture.abort = () => {
-            if(image && typeof image.hasAttribute === 'function'){
+            if (image && typeof image.hasAttribute === 'function') {
                 image.src = '';
             }
         };
-
         return texture;
-	}
+    }
 }
-
 function createTile(name, side, level, data, source) {
-    const url = source()(side, level, data.x, data.y);
+    const url = typeof source == 'function' ? source()(side, level, data.x, data.y) : source;
     const tileBaseSize = pano.tileBase + pano.maxLevels - level;
     const half = tileBaseSize / 2;
     const offsetX = data.width / 2 - half + data.offsetX;
     const offsetY = half - data.height / 2 - data.offsetY;
     const geometry = new PlaneGeometry(data.width, data.height);
-    
     let material;
-    material = new MeshBasicMaterial({ map: new TextureLoader().load(url), depthWrite: true, transparent: true, opacity: 1});
+    material = new MeshBasicMaterial({ map: new TextureLoader().load(url), depthWrite: true, transparent: true, opacity: 1 });
     material.side = DoubleSide;
     const tile = new Mesh(geometry, material);
     tile.name = name;
@@ -29711,67 +29705,77 @@ function createTile(name, side, level, data, source) {
 const sidePosition = (side, level) => {
     const tileBaseSize = pano.tileBase + pano.maxLevels - level;
     const half = tileBaseSize / 2;
-    if(side == 'f') return [ 0, 0, half ]
-    if(side == 'b') return [ 0, 0, -half ]
-    if(side == 'l') return [ half, 0, 0 ]
-    if(side == 'r') return [ -half,  0, 0 ]
-    if(side == 'u') return [ 0, half, 0 ]
-    if(side == 'd') return [ 0, -half, 0 ]
-    return [0, 0, 0]
+    if (side == 'f')
+        return [0, 0, half];
+    if (side == 'b')
+        return [0, 0, -half];
+    if (side == 'l')
+        return [half, 0, 0];
+    if (side == 'r')
+        return [-half, 0, 0];
+    if (side == 'u')
+        return [0, half, 0];
+    if (side == 'd')
+        return [0, -half, 0];
+    return [0, 0, 0];
 };
-
-const sideRotation = side => {
-    if(side =='f') return [0, MathUtils.degToRad(180), 0]
-    if(side =='b') return [0, MathUtils.degToRad(0), 0]
-    if(side =='l') return [0, MathUtils.degToRad(-90), 0]
-    if(side =='r') return [0, MathUtils.degToRad(90), 0]
-    if(side =='d') return [MathUtils.degToRad(90), MathUtils.degToRad(180), 0]
-    if(side =='u') return [MathUtils.degToRad(-90), MathUtils.degToRad(180), 0]
-    return [0, 0, 0]
+const sideRotation = (side) => {
+    if (side == 'f')
+        return [0, MathUtils.degToRad(180), 0];
+    if (side == 'b')
+        return [0, MathUtils.degToRad(0), 0];
+    if (side == 'l')
+        return [0, MathUtils.degToRad(-90), 0];
+    if (side == 'r')
+        return [0, MathUtils.degToRad(90), 0];
+    if (side == 'd')
+        return [MathUtils.degToRad(90), MathUtils.degToRad(180), 0];
+    if (side == 'u')
+        return [MathUtils.degToRad(-90), MathUtils.degToRad(180), 0];
+    return [0, 0, 0];
 };
-
 function createSide(side, level, tiles, source) {
     const group = new Group();
     const position = sidePosition(side, level);
     const rotation = sideRotation(side);
-    group.position.set(position[0], position[1], position[2] );
-    group.rotation.set(rotation[0], rotation[1], rotation[2] );
+    group.position.set(position[0], position[1], position[2]);
+    group.rotation.set(rotation[0], rotation[1], rotation[2]);
     group.renderOrder = level + 1;
     group.name = level + '-' + side;
-    for(var i = 0; i < tiles.length; i++){
+    for (var i = 0; i < tiles.length; i++) {
         const data = tiles[i];
         const name = level + '-' + side + '-' + data.x + '-' + data.y;
         group.add(createTile(name, side, level, data, source));
     }
-    return group
+    return group;
 }
-
 function updateSide(group, side, level, tiles, source, meshes) {
-    for(var i = 0; i < tiles.length; i++){
+    for (var i = 0; i < tiles.length; i++) {
         const data = tiles[i];
         const name = level + '-' + side + '-' + data.x + '-' + data.y;
-        if(!group.getObjectByName(name)){
+        if (!group.getObjectByName(name)) {
             group.add(createTile(name, side, level, data, source));
         }
     }
-    for(var i = group.children.length - 1; i >= 0; i--){
-        if(!meshes.includes(group.children[i].name)){
+    for (var i = group.children.length - 1; i >= 0; i--) {
+        if (!meshes.includes(group.children[i].name)) {
             const tile = group.children[i];
-            tile.material.map.abort();
+            const material = tile.material;
+            const texture = material.map;
+            texture.abort();
             tile.geometry.dispose();
-            tile.material.dispose();
-            group.remove( tile );
+            material.dispose();
+            group.remove(tile);
         }
     }
 }
-
 function deleteSide(group) {
-    for(var i = group.children.length - 1; i >= 0; i--){
+    for (var i = group.children.length - 1; i >= 0; i--) {
         const tile = group.children[i];
         tile.material.map.abort();
         tile.geometry.dispose();
         tile.material.dispose();
-        group.remove( tile );
+        group.remove(tile);
     }
 }
 
@@ -29971,10 +29975,10 @@ class Multires {
                 const name = level + '-' + side;
                 const group = this.instance.getObjectByName(name);
                 if (group) {
-                    updateSide(group, side, level, tiles, this.source, this.visible.meshes);
+                    updateSide(group, side, parseInt(level), tiles, this.source, this.visible.meshes);
                 }
                 else {
-                    this.instance.add(createSide(side, level, tiles, this.source));
+                    this.instance.add(createSide(side, parseInt(level), tiles, this.source));
                 }
             }
         }

@@ -1,7 +1,8 @@
 {
     "pano": {
         "tileBase": 100,
-        "maxLevels": 16
+        "maxLevels": 16,
+        "pixelZoom": 2
     },
     
     "camera": {

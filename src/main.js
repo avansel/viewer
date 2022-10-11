@@ -23,30 +23,26 @@ new Avansel(document.getElementById('pano3'))
 	})
 	.start()
 
-	/*
-	// Multiresolution panorama
-	/*
-	const avansel = new AvanselViewer(container, [
-			{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
-			{ tileSize: 512, size: 512 * 2 ** 1 },
-			{ tileSize: 512, size: 512 * 2 ** 2 },
-			{ tileSize: 512, size: 512 * 2 ** 3 },
-			{ tileSize: 512, size: 512 * 2 ** 4 },
-			{ tileSize: 512, size: 512 * 2 ** 5 },
-			{ tileSize: 512, size: 512 * 2 ** 6 },
-			{ tileSize: 512, size: 512 * 2 ** 7 },
-			{ tileSize: 512, size: 512 * 2 ** 8 },
-			{ tileSize: 512, size: 512 * 2 ** 9 },
-			{ tileSize: 512, size: 512 * 2 ** 10 },
-			{ tileSize: 512, size: 512 * 2 ** 11 },
-			{ tileSize: 512, size: 512 * 2 ** 12 },
-			{ tileSize: 512, size: 512 * 2 ** 13 },
-			{ tileSize: 512, size: 512 * 2 ** 14 },
-			{ tileSize: 512, size: 512 * 2 ** 15 }
-		],
-		() => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`
-	)
-	*/
+new Avansel(document.getElementById('pano4'))
+	.multires([
+		{ tileSize: 512, size: 512 * 2 ** 0, fallback: true },
+		{ tileSize: 512, size: 512 * 2 ** 1 },
+		{ tileSize: 512, size: 512 * 2 ** 2 },
+		{ tileSize: 512, size: 512 * 2 ** 3 },
+		{ tileSize: 512, size: 512 * 2 ** 4 },
+		{ tileSize: 512, size: 512 * 2 ** 5 },
+		{ tileSize: 512, size: 512 * 2 ** 6 },
+		{ tileSize: 512, size: 512 * 2 ** 7 },
+		{ tileSize: 512, size: 512 * 2 ** 8 },
+		{ tileSize: 512, size: 512 * 2 ** 9 },
+		{ tileSize: 512, size: 512 * 2 ** 10 },
+		{ tileSize: 512, size: 512 * 2 ** 11 },
+		{ tileSize: 512, size: 512 * 2 ** 12 },
+		{ tileSize: 512, size: 512 * 2 ** 13 },
+		{ tileSize: 512, size: 512 * 2 ** 14 },
+		{ tileSize: 512, size: 512 * 2 ** 15 }
+	], () => (s, l, x, y) => `https://dev-api.trvi.tours/tile?size=512&total=1024&side=${s}&x=${x}&y=${y}&level=${l}`)
+	.start()
 	/*
 	const avansel = new AvanselViewer(container, [
 		{ tileSize: 512, size: 640, fallback: true },
