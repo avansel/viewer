@@ -1,26 +1,26 @@
-## Avansel Viewer
+# Avansel Viewer
 
 Free Easy to use Opensource JavaScript Three.js based panorama / virtual tours viewer
 
-### Why
+## Why
 
 * Free
 * Easy to use
 * Opensource
 
-# Features
+## Features
 
 * [Multiresolution](https://avansel.github.io/documentation/#multires)
 * Plugins and Modules
 * Support hotspots, polygons
 
 
-## Installing
-### Using npm
+## Installing using npm
 
 ```
 npm i avansel
 ```
+See more ways to install in the [documentaion](https://avansel.github.io/documentation/).
 
 ## Get Started
 
@@ -44,7 +44,7 @@ new Avansel(document.querySelector('#pano'))
 
 We would like to extend our thanks to the following sponsors for funding Avansel development. If you are interested in becoming a sponsor, please visit the Avansel [Patreon page](https://www.patreon.com/grinev).
 
-### Premium Partners
+## Premium Partners
 
 * [Avansel](https://avansel.com)
 * [TrueVirtualTours](https://truevirtualtours.com)
