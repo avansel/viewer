@@ -1,71 +1,44 @@
 ## Avansel Viewer
 
-Avansel Viewer is a Free Opensource ThreeJS based JavaScript library that let you view 360° panoramas and create virtual tours from them.
+Free Easy to use Opensource JavaScript Three.js based panorama / virtual tours viewer
 
-There are some commercial solutions in the market but yet no opensource solution that would be flexable, extandable, and supported. We want to have a JavaScript Panorama/Virtual Tour viewer that:
+### Why
 
-* Based on widely known JavaScript 3D library
+* Free
 * Easy to use
-* Free to use in any project
-* Support of third-party plugins and modules
-* Support multiresolution
-* Support hotspots, polygons, etc
+* Opensource
+
+# Features
+
+* [Multiresolution](https://avansel.github.io/documentation/#multires)
+* Plugins and Modules
+* Support hotspots, polygons
+
 
 ## Installing
 ### Using npm
 
 ```
-npm i avansel/viewer
+npm i avansel
 ```
 
-## Multiresolution panorama viewer exampe
+## Get Started
 
-index.html
+HTML
 ```html
-<!doctype html>
-<html>
-  <head>
-    <title>Avansel Pano Viewer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type="text/css">
-      body, html { margin: 0; padding: 0; overflow: hidden; }
-      #pano{ height: 100vh; width: 100vw; }
-    </style>
-  </head>
-  <body>
-    <div id="pano"></div>
-    <script src="/dist/main.js"></script>
-  </body>
-</html>
+<div id="pano"></div>
 ```
-main.js
+
+Javascript
 ```javascript
-import { AvanselViewer } from './AvanselViewer/AvanselViewer.ts'
-
-function main(){
-	const container = document.querySelector('#pano')
-
-	const avansel = new AvanselViewer(container, [
-		{ tileSize: 512, size: 640, fallback: true },
-		{ tileSize: 512, size: 1280 },
-		{ tileSize: 512, size: 2560 },
-		{ tileSize: 512, size: 4864 }
-	],
-	() => (s, l, x, y) => {
-		l = parseInt(l) + 1
-		x = ((x + 1) + '').padStart(2, '0')
-		y = ((y + 1) + '').padStart(2, '0')
-		return `/tiles/${s}/l${l}/${y}/l${l}_${s}_${y}_${x}.jpg`
-	})
-
-	avansel.start()
-}
-
-main()
+import { Avansel } from "https://unpkg.com/avansel"
+new Avansel(document.querySelector('#pano'))
+  .sphere('/assets/pano.jpg')
+  .start()
 ```
 ## Examples
 
-* [Multi resolution/Petapixel sintetic panorama](https://jsfiddle.net/grinevri/8ntfmsxh/25/)
+* [Demo / Examples](https://avansel.github.io/examples/)
 
 ## Avansel Sponsors
 
@@ -79,8 +52,7 @@ We would like to extend our thanks to the following sponsors for funding Avansel
 ## Contributing
 
 Thank you for considering contributing to the Avansel Viewer! 
-* Bug Reports
-
+* [Bug Reports](https://github.com/avansel/viewer/issues)
 
 ## Security Vulnerabilities
 
