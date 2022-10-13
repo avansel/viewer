@@ -1,6 +1,6 @@
 {
   "name": "avansel",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Free OpenSource ThreeJS Javascript Virtual Tours viewer",
   "keywords": [
     "threejs",
@@ -17,6 +17,10 @@
     ".": "./build/avansel.js"
   },
   "homepage": "https://avansel.github.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avansel/viewer.git"
+  },
   "bugs": {
     "url": "https://github.com/avansel/viewer/issues",
     "email": "roman@grinev.software"
