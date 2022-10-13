@@ -31,7 +31,7 @@ HTML
 
 Javascript
 ```javascript
-import { Avansel } from "https://unpkg.com/avansel"
+import { Avansel } from "avansel"
 new Avansel(document.querySelector('#pano'))
   .sphere('/assets/pano.jpg')
   .start()
