@@ -47,7 +47,6 @@ We would like to extend our thanks to the following sponsors for funding Avansel
 ## Premium Partners
 
 * [Avansel](https://avansel.com)
-* [LabPano](https://www.labpano.com/en/) the [PilotPano Versatile 360⁰ AI Camera](https://equip.avansel.com/product/pilotpano-versatile-360-ai) manufactorer
 * [TrueVirtualTours](https://truevirtualtours.com)
 
 ## Contributing
