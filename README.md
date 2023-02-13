@@ -53,7 +53,7 @@ We would like to extend our thanks to the following sponsors for funding Avansel
 
 Thank you for considering contributing to the Avansel Viewer!
 * Star the repository
-* [Participate in discussions](https://github.com/avansel/viewer/discussions)
+* [Participate in discussions](https://github.com/avansel/viewer/discussions): ask questions, share your ideas
 * [Bug Reports](https://github.com/avansel/viewer/issues)
 
 ## Security Vulnerabilities
