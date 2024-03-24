@@ -29351,7 +29351,7 @@ const tilesFor = (level, levelData, bounds) => {
         return [];
     const { tileSize, size } = levelData;
     const tileBaseSize = pano.tileBase + pano.maxLevels - level;
-    const tileSizePart = Math.round(tileSize / (size / tileBaseSize));
+    const tileSizePart = Math.round(tileSize / (size / tileBaseSize) * 1000) / 1000;
     const tiles = [];
     const max = Math.ceil(tileBaseSize / tileSizePart);
     let xMin = minFor(bounds.x.min, max, 2);
@@ -30073,13 +30073,25 @@ new Avansel(document.getElementById('pano2'))
 	.start();
 
 
+// new Avansel(document.getElementById('pano3'))
+// 	.multires([
+// 		{ tileSize: 477, size: 477, fallback: true },
+// 		{ tileSize: 512, size: 954 },
+// 		{ tileSize: 512, size: 1908 },
+// 		{ tileSize: 512, size: 3816 },
+// 	], () => (s, l, x, y) => {
+// 		l = parseInt(l) + 1
+// 		return `/files/examples/multires-1/${l}/${s}${y}_${x}.jpg`
+// 	})
+// 	.start()
+
 new Avansel(document.getElementById('pano3'))
 	.multires([
 		{ tileSize: 476, size: 476, fallback: true },
-		{ tileSize: 512, size: 952 }
+		{ tileSize: 512, size: 952 },
 	], () => (s, l, x, y) => {
 		l = parseInt(l) + 1;
-		return `/files/examples/multires-1/${l}/${s}${y}_${x}.jpg`
+		return `/files/examples/multires-2/${l}/${s}${y}_${x}.jpg`
 	})
 	.start();
 
