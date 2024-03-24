@@ -61,7 +61,7 @@ export const tilesFor = (level: number, levelData: Level, bounds: SideBounds):Ar
     if(!bounds?.x?.min && !bounds?.x?.max) return []
     const { tileSize, size } = levelData
     const tileBaseSize = pano.tileBase + pano.maxLevels - level
-    const tileSizePart = tileSize / (size / tileBaseSize)
+    const tileSizePart = Math.round(tileSize / (size / tileBaseSize))
     const tiles = [];
     const max = Math.ceil(tileBaseSize / tileSizePart)
 
