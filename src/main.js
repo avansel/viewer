@@ -12,11 +12,8 @@ new Avansel(document.getElementById('pano2'))
 
 new Avansel(document.getElementById('pano3'))
 	.multires([
-		{ tileSize: 374, size: 374, fallback: true },
-		{ tileSize: 512, size: 749 },
-		{ tileSize: 512, size: 1498 },
-		{ tileSize: 512, size: 2996 },
-		{ tileSize: 512, size: 5992 },
+		{ tileSize: 476, size: 476, fallback: true },
+		{ tileSize: 512, size: 952 }
 	], () => (s, l, x, y) => {
 		l = parseInt(l) + 1
 		return `/files/examples/multires-1/${l}/${s}${y}_${x}.jpg`
