@@ -60,7 +60,7 @@ Thank you for considering contributing to the Avansel Viewer!
 
 ## Security Vulnerabilities
 
-If you discover a security vulnerability within Avansel Viewer, please send an e-mail to Roman Grinev via roman@avansel.com. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within Avansel Viewer, please send an e-mail to Roman Grinev via roman@grinev.studio. All security vulnerabilities will be promptly addressed.
 
 ## License
 
