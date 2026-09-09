@@ -40,14 +40,8 @@ new Avansel(document.querySelector('#pano'))
 
 * [Demo / Examples](https://avansel.github.io/examples/)
 
-## Avansel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Avansel development. If you are interested in becoming a sponsor, please visit the Avansel [Patreon page](https://www.patreon.com/grinev).
-
 ## Premium Partners
 
-* [Virturos](https://virturos.com)
-* [Avansel](https://avansel.com)
 * [TrueVirtualTours](https://truevirtualtours.com)
 * [Grinev Studio](https://grinev.studio)
 
