@@ -28,7 +28,9 @@
   "scripts": {
     "dev": "rollup -c ./utils/build/rollup.config.js -w",
     "build": "rollup -c ./utils/build/rollup.config.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "author": {
     "name": "Roman Grinev",
@@ -51,7 +53,8 @@
     "rollup-plugin-gzip": "^3.0.1",
     "ts-loader": "^9.3.1",
     "tslib": "^2.4.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.2",
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "three": "^0.143.0"

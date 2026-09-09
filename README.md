@@ -212,6 +212,7 @@ npm install
 npm run build
 npm run dev
 npm start
+npm test
 ```
 
 ### What the scripts do
@@ -219,6 +220,7 @@ npm start
 - `npm run build`: builds the library and demo bundle with Rollup
 - `npm run dev`: runs Rollup in watch mode
 - `npm start`: starts the local Express demo server on port `3000`
+- `npm test`: runs unit tests with Vitest on port `3000`
 
 ### Local demo
 
